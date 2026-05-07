@@ -44,7 +44,7 @@ export default function HomePage() {
   const [reviewText, setReviewText] = useState('');
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
-  // --- ДОБАВЛЕНО: ЗАКЛАДКИ ---
+  // Закладки
   const [favorites, setFavorites] = useState<string[]>([]);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
@@ -103,7 +103,7 @@ export default function HomePage() {
 
     const fetchServices = async () => {
       try {
-        const { data } = await supabase.from('services').select('*').order('created_at', { ascending: false });
+        const { data } = await supabase.from('services').select('*');
         if (isMounted && data) setServices(data);
         setLoading(false);
       } catch (err) { if (isMounted) setLoading(false); }
@@ -121,7 +121,7 @@ export default function HomePage() {
     return () => { isMounted = false; subscription?.unsubscribe(); };
   }, []);
 
-  // --- ДОБАВЛЕНО: ЗАГРУЗКА ЗАКЛАДОК ---
+  // ЗАГРУЗКА ЗАКЛАДОК
   useEffect(() => {
     let isMounted = true;
     if (user) {
@@ -211,7 +211,6 @@ export default function HomePage() {
     } else { alert("Ошибка: " + error.message); }
   };
 
-  // --- ДОБАВЛЕНО: ТОГГЛ ЗАКЛАДКИ ---
   const handleToggleFavorite = async (serviceId: string) => {
     if (!user) {
       alert(translate('auth_req'));
@@ -253,10 +252,9 @@ export default function HomePage() {
     else setBudgetRanges([...budgetRanges, rangeId]);
   };
 
+  // 1. СНАЧАЛА ФИЛЬТРУЕМ
   const filteredServices = services.filter(s => {
-    // --- ДОБАВЛЕНО: ФИЛЬТР ЗАКЛАДОК ---
     if (showFavoritesOnly && !favorites.includes(s.id)) return false;
-
     if (activeCategory !== 'ALL' && s.category !== activeCategory) return false;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -278,6 +276,13 @@ export default function HomePage() {
     return true;
   });
 
+  // 2. ЗАТЕМ СОРТИРУЕМ: ТОП-объявления всегда сверху!
+  const sortedServices = [...filteredServices].sort((a, b) => {
+    if (a.is_top && !b.is_top) return -1;
+    if (!a.is_top && b.is_top) return 1;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime(); // Новые сверху
+  });
+
   return (
     <div className="min-h-screen bg-[#F3F4F6] font-sans text-[#333] flex flex-col" suppressHydrationWarning>
       
@@ -287,7 +292,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* HEADER */}
+      {/* HEADER (Адаптивный + ВСЕ 7 ЯЗЫКОВ) */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-[1240px] mx-auto px-3 sm:px-4 h-[70px] flex items-center justify-between gap-2 sm:gap-6">
           <Link href="/" className="text-[26px] sm:text-[32px] font-black tracking-tighter cursor-pointer flex-shrink-0">
@@ -303,8 +308,15 @@ export default function HomePage() {
 
           <div className="flex items-center gap-3 sm:gap-5 text-[12px] sm:text-[14px] font-medium ml-auto whitespace-nowrap">
             <div className="flex items-center gap-1.5 sm:gap-3 border-r border-gray-200 pr-3 sm:pr-4">
+              {/* ВОЗВРАЩЕНЫ 7 ЯЗЫКОВ */}
               <select value={lang} onChange={(e) => handleLangChange(e.target.value)} className="text-[12px] sm:text-[13px] font-bold outline-none cursor-pointer bg-transparent">
-                <option value="RU">RU</option><option value="EN">EN</option><option value="PL">PL</option>
+                <option value="RU">RU</option>
+                <option value="EN">EN</option>
+                <option value="PL">PL</option>
+                <option value="DE">DE</option>
+                <option value="ES">ES</option>
+                <option value="IT">IT</option>
+                <option value="FR">FR</option>
               </select>
               <select value={currency} onChange={(e) => handleCurrencyChange(e.target.value)} className="text-[12px] sm:text-[13px] font-bold outline-none cursor-pointer bg-transparent">
                 <option value="PLN">PLN</option><option value="USD">USD</option><option value="EUR">EUR</option>
@@ -376,7 +388,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* --- ДОБАВЛЕНО: КНОПКА ФИЛЬТРА ЗАКЛАДОК В МЕНЮ --- */}
+            {/* КНОПКА ФИЛЬТРА ЗАКЛАДОК В МЕНЮ */}
             {user && (
               <div className="pt-6 border-t border-gray-100">
                 <label className="flex items-center gap-2 cursor-pointer group">
@@ -390,12 +402,12 @@ export default function HomePage() {
           <section className="flex-1 space-y-4 w-full overflow-hidden">
             {loading ? (
               <div className="p-10 text-center animate-pulse text-gray-400 font-medium">Loading...</div>
-            ) : filteredServices.length === 0 ? (
+            ) : sortedServices.length === 0 ? (
                <div className="bg-white p-12 rounded-[8px] border border-dashed border-gray-300 text-center text-gray-500 font-medium">
                 {translate('no_orders')}
               </div>
             ) : (
-              filteredServices.map((s) => (
+              sortedServices.map((s) => (
                 <ServiceCard 
                   key={s.id} 
                   service={s} 
@@ -404,9 +416,9 @@ export default function HomePage() {
                   translate={translate} 
                   handleOrder={() => handleOrder(s.id, s.title)} 
                   deleteService={() => {}}
-                  // Передаем пропсы в карточку
                   isFavorite={favorites.includes(s.id)}
                   toggleFavorite={() => handleToggleFavorite(s.id)}
+                  isTop={s.is_top} // <-- ПЕРЕДАЕМ СТАТУС ТОП В КАРТОЧКУ
                 />
               ))
             )}
@@ -429,7 +441,7 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* МОДАЛКИ (Без изменений) */}
+      {/* МОДАЛКИ (АВТОРИЗАЦИЯ) */}
       {showAuthModal && (
         <div className="fixed inset-0 z-[300] bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-sm rounded-[12px] p-8 shadow-2xl">
@@ -454,6 +466,7 @@ export default function HomePage() {
         </div>
       )}
 
+      {/* ТРЕКЕР ЗАКАЗОВ */}
       {showTracker && (
         <div className="fixed inset-0 z-[100] bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-lg rounded-[12px] p-6 shadow-2xl relative">
@@ -492,6 +505,7 @@ export default function HomePage() {
         </div>
       )}
 
+      {/* МОДАЛЬНОЕ ОКНО ОТЗЫВА */}
       {reviewModal && (
         <div className="fixed inset-0 z-[400] bg-gray-900/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-sm rounded-[16px] p-8 shadow-2xl relative text-center">
