@@ -38,21 +38,25 @@ export default function HomePage() {
   const [userOrders, setUserOrders] = useState<any[]>([]);
   const [trackingLoading, setTrackingLoading] = useState(false);
 
-  // Состояния для отзывов
+  // Отзывы
   const [reviewModal, setReviewModal] = useState<{orderId: string, serviceId: string} | null>(null);
   const [rating, setRating] = useState(5);
   const [reviewText, setReviewText] = useState('');
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
+  // --- ДОБАВЛЕНО: ЗАКЛАДКИ ---
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+
   // --- СЛОВАРЬ (7 ЯЗЫКОВ) ---
   const t: Record<string, any> = {
-    RU: { payment_notice: "Тестовый режим (Оплата отключена)", buy_now: "Оплатить", title: "UNIT Marketplace — Цифровые Услуги", sub: "ОБЪЯВЛЕНИЯ", search: "Найти услуги", track_orders: "Мои Заказы", admin: "АДМИН", login: "Войти", logout: "Выйти", register: "Регистрация", pass_q: "Пароль", auth_req: "Войдите в аккаунт, чтобы продолжить", no_acc: "Нет аккаунта?", has_acc: "Уже есть аккаунт?", msg: "Заказ принят!", rub_cat: "Рубрики", rub_bud: "Бюджет", cat_all: "Все", cat_design: "Дизайн", cat_dev: "Разработка и IT", cat_text: "Тексты и переводы", cat_seo: "SEO и трафик", cat_social: "Соцсети и маркетинг", cat_audio: "Аудио, видео, съемка", cat_bus: "Бизнес и жизнь", regulations: "Регламент", rodo: "Политика конфиденциальности (RODO)", footer_rights: "Все права защищены.", no_orders: "Ничего не найдено", profile: "Кабинет", show_all: "Показать всё", buyer: "Продавец", projects_on_exchange: "Проектов на бирже", hired_on: "Успешно сдано", rest_time: "Срок: 1-3 дня", review_btn: "Смотреть", order: "Заказать", reviews_count: "Отзывов", delete: "Удалить", btn_rate: "⭐ Оценить", modal_review_title: "Оставьте отзыв", ph_review: "Напишите пару слов о работе...", btn_send_review: "Отправить отзыв", review_success: "Спасибо за ваш отзыв!" },
-    EN: { payment_notice: "Test Mode (Payments Disabled)", buy_now: "Pay Now", title: "UNIT Marketplace — Digital Services", sub: "LISTINGS", search: "Find services", track_orders: "My Orders", admin: "ADMIN", login: "Login", logout: "Logout", register: "Sign Up", pass_q: "Password", auth_req: "Please login to continue", no_acc: "No account?", has_acc: "Already have an account?", msg: "Order accepted!", rub_cat: "Categories", rub_bud: "Budget", cat_all: "All", cat_design: "Design", cat_dev: "Development & IT", cat_text: "Texts & Translation", cat_seo: "SEO & Traffic", cat_social: "Social Media", cat_audio: "Audio & Video", cat_bus: "Business & Life", regulations: "Terms of Service", rodo: "Privacy Policy (GDPR)", footer_rights: "All rights reserved.", no_orders: "Nothing found", profile: "Profile", show_all: "Show all", buyer: "Seller", projects_on_exchange: "Projects", hired_on: "Success rate", rest_time: "Time: 1-3 days", review_btn: "View", order: "Order", reviews_count: "Reviews", delete: "Delete", btn_rate: "⭐ Rate", modal_review_title: "Leave a review", ph_review: "Write a few words about the work...", btn_send_review: "Send review", review_success: "Thank you for your review!" },
-    PL: { payment_notice: "Tryb testowy (Płatności wyłączone)", buy_now: "Zapłać", title: "UNIT Marketplace — Usługi Cyfrowe", sub: "OGŁOSZENIA", search: "Znajdź usługi", track_orders: "Moje Zamówienia", admin: "ADMIN", login: "Zaloguj się", logout: "Wyloguj", register: "Rejestracja", pass_q: "Hasło", auth_req: "Zaloguj się, aby kontynuować", no_acc: "Brak konta?", has_acc: "Masz już konto?", msg: "Zamówienie przyjęte!", rub_cat: "Kategorie", rub_bud: "Budżet", cat_all: "Wszystko", cat_design: "Design", cat_dev: "Programowanie i IT", cat_text: "Teksty i Tłumaczenia", cat_seo: "SEO i Ruch", cat_social: "Media Społecznościowe", cat_audio: "Audio i Wideo", cat_bus: "Biznes i Życie", regulations: "Regulamin", rodo: "Polityka prywatności (RODO)", footer_rights: "Wszelkie prawa zastrzeżone.", no_orders: "Nic nie znaleziono", profile: "Profil", show_all: "Pokaż wszystko", buyer: "Sprzedawca", projects_on_exchange: "Projekty", hired_on: "Sukces", rest_time: "Czas: 1-3 dni", review_btn: "Zobacz", order: "Zamów", reviews_count: "Opinie", delete: "Usuń", btn_rate: "⭐ Oceń", modal_review_title: "Zostaw opinię", ph_review: "Napisz kilka słów o pracy...", btn_send_review: "Wyślij opinię", review_success: "Dziękujemy za Twoją opinię!" },
-    DE: { payment_notice: "Testmodus (Zahlungen deaktiviert)", buy_now: "Bezahlen", title: "UNIT Marketplace — Digitale Dienste", sub: "ANZEIGEN", search: "Dienste finden", track_orders: "Meine Bestellungen", admin: "ADMIN", login: "Anmelden", logout: "Abmelden", register: "Registrieren", pass_q: "Passwort", auth_req: "Bitte einloggen, um fortzufahren", no_acc: "Kein Konto?", has_acc: "Bereits ein Konto?", msg: "Bestellung angenommen!", rub_cat: "Kategorien", rub_bud: "Budget", cat_all: "Alle", cat_design: "Design", cat_dev: "Entwicklung & IT", cat_text: "Texte & Übersetzungen", cat_seo: "SEO & Traffic", cat_social: "Soziale Medien", cat_audio: "Audio & Video", cat_bus: "Business & Leben", regulations: "Nutzungsbedingungen", rodo: "Datenschutzerklärung (DSGVO)", footer_rights: "Alle Rechte vorbehalten.", no_orders: "Nichts gefunden", profile: "Kabinett", show_all: "Alles anzeigen", buyer: "Verkäufer", projects_on_exchange: "Projekte", hired_on: "Erfolgsquote", rest_time: "Zeit: 1-3 Tage", review_btn: "Ansehen", order: "Bestellen", reviews_count: "Bewertungen", delete: "Löschen", btn_rate: "⭐ Bewerten", modal_review_title: "Bewertung hinterlassen", ph_review: "Schreibe ein paar Worte über die Arbeit...", btn_send_review: "Bewertung senden", review_success: "Danke für deine Bewertung!" },
-    ES: { payment_notice: "Modo de prueba (Pagos desactivados)", buy_now: "Pagar", title: "UNIT Marketplace — Servicios Digitales", sub: "ANUNCIOS", search: "Buscar servicios", track_orders: "Mis Pedidos", admin: "ADMIN", login: "Iniciar sesión", logout: "Cerrar sesión", register: "Regístrate", pass_q: "Contraseña", auth_req: "Inicie sesión para continuar", no_acc: "¿No tienes cuenta?", has_acc: "¿Ya tienes cuenta?", msg: "¡Pedido aceptado!", rub_cat: "Categorías", rub_bud: "Presupuesto", cat_all: "Todo", cat_design: "Diseño", cat_dev: "Desarrollo y TI", cat_text: "Textos y Traducción", cat_seo: "SEO y Tráfico", cat_social: "Redes Sociales", cat_audio: "Audio y Video", cat_bus: "Negocios y Vida", regulations: "Términos de servicio", rodo: "Política de privacidad (RGPD)", footer_rights: "Todos los derechos reservados.", no_orders: "Nada encontrado", profile: "Perfil", show_all: "Mostrar todo", buyer: "Vendedor", projects_on_exchange: "Proyectos", hired_on: "Éxito", rest_time: "Tiempo: 1-3 días", review_btn: "Ver", order: "Pedir", reviews_count: "Reseñas", delete: "Eliminar", btn_rate: "⭐ Calificar", modal_review_title: "Deja una reseña", ph_review: "Escribe algunas palabras sobre el trabajo...", btn_send_review: "Enviar reseña", review_success: "¡Gracias por tu reseña!" },
-    IT: { payment_notice: "Modalità test (Pagamenti disabilitati)", buy_now: "Paga", title: "UNIT Marketplace — Servizi Digitali", sub: "ANNUNCI", search: "Trova servizi", track_orders: "I miei ordini", admin: "ADMIN", login: "Accedi", logout: "Esci", register: "Iscriviti", pass_q: "Password", auth_req: "Accedi per continuare", no_acc: "Nessun account?", has_acc: "Hai già un account?", msg: "Ordine accettato!", rub_cat: "Categorie", rub_bud: "Budget", cat_all: "Tutto", cat_design: "Design", cat_dev: "Sviluppo e IT", cat_text: "Testi e Traduzioni", cat_seo: "SEO e Traffico", cat_social: "Social Media", cat_audio: "Audio e Video", cat_bus: "Affari e Vita", regulations: "Termini di servizio", rodo: "Informativa sulla privacy (GDPR)", footer_rights: "Tutti i diritti riservati.", no_orders: "Nessun risultato", profile: "Profilo", show_all: "Mostra tutto", buyer: "Venditore", projects_on_exchange: "Progetti", hired_on: "Successo", rest_time: "Tempo: 1-3 giorni", review_btn: "Visualizza", order: "Ordina", reviews_count: "Recensioni", delete: "Elimina", btn_rate: "⭐ Valuta", modal_review_title: "Lascia una recensione", ph_review: "Scrivi qualche parola sul lavoro...", btn_send_review: "Invia recensione", review_success: "Grazie per la tua recensione!" },
-    FR: { payment_notice: "Mode test (Paiements désactivés)", buy_now: "Payer", title: "UNIT Marketplace — Services Numériques", sub: "ANNONCES", search: "Trouver des services", track_orders: "Mes commandes", admin: "ADMIN", login: "Se connecter", logout: "Se déconnecter", register: "S'inscrire", pass_q: "Mot de passe", auth_req: "Veuillez vous connecter", no_acc: "Pas de compte?", has_acc: "Déjà un compte?", msg: "Commande acceptée!", rub_cat: "Catégories", rub_bud: "Budget", cat_all: "Tout", cat_design: "Design", cat_dev: "Développement et informatique", cat_text: "Textes et traduction", cat_seo: "SEO et trafic", cat_social: "Réseaux sociaux", cat_audio: "Audio et vidéo", cat_bus: "Affaires et vie", regulations: "Conditions d'utilisation", rodo: "Politique de confidentialité (RGPD)", footer_rights: "Tous droits réservés.", no_orders: "Rien n'a été trouvé", profile: "Profil", show_all: "Tout afficher", buyer: "Vendeur", projects_on_exchange: "Projets", hired_on: "Succès", rest_time: "Temps: 1-3 jours", review_btn: "Voir", order: "Commander", reviews_count: "Avis", delete: "Supprimer", btn_rate: "⭐ Évaluer", modal_review_title: "Laisser un avis", ph_review: "Écrivez quelques mots sur le travail...", btn_send_review: "Envoyer l'avis", review_success: "Merci pour votre avis !" }
+    RU: { fav_only: "Мои закладки", payment_notice: "Тестовый режим (Оплата отключена)", buy_now: "Оплатить", title: "UNIT Marketplace — Цифровые Услуги", sub: "ОБЪЯВЛЕНИЯ", search: "Найти услуги", track_orders: "Мои Заказы", admin: "АДМИН", login: "Войти", logout: "Выйти", register: "Регистрация", pass_q: "Пароль", auth_req: "Войдите в аккаунт, чтобы продолжить", no_acc: "Нет аккаунта?", has_acc: "Уже есть аккаунт?", msg: "Заказ принят!", rub_cat: "Рубрики", rub_bud: "Бюджет", cat_all: "Все", cat_design: "Дизайн", cat_dev: "Разработка и IT", cat_text: "Тексты и переводы", cat_seo: "SEO и трафик", cat_social: "Соцсети и маркетинг", cat_audio: "Аудио, видео, съемка", cat_bus: "Бизнес и жизнь", regulations: "Регламент", rodo: "Политика конфиденциальности (RODO)", footer_rights: "Все права защищены.", no_orders: "Ничего не найдено", profile: "Кабинет", show_all: "Показать всё", buyer: "Продавец", projects_on_exchange: "Проектов на бирже", hired_on: "Успешно сдано", rest_time: "Срок: 1-3 дня", review_btn: "Смотреть", order: "Заказать", reviews_count: "Отзывов", delete: "Удалить", btn_rate: "⭐ Оценить", modal_review_title: "Оставьте отзыв", ph_review: "Напишите пару слов о работе...", btn_send_review: "Отправить отзыв", review_success: "Спасибо за ваш отзыв!" },
+    EN: { fav_only: "My Favorites", payment_notice: "Test Mode (Payments Disabled)", buy_now: "Pay Now", title: "UNIT Marketplace — Digital Services", sub: "LISTINGS", search: "Find services", track_orders: "My Orders", admin: "ADMIN", login: "Login", logout: "Logout", register: "Sign Up", pass_q: "Password", auth_req: "Please login to continue", no_acc: "No account?", has_acc: "Already have an account?", msg: "Order accepted!", rub_cat: "Categories", rub_bud: "Budget", cat_all: "All", cat_design: "Design", cat_dev: "Development & IT", cat_text: "Texts & Translation", cat_seo: "SEO & Traffic", cat_social: "Social Media", cat_audio: "Audio & Video", cat_bus: "Business & Life", regulations: "Terms of Service", rodo: "Privacy Policy (GDPR)", footer_rights: "All rights reserved.", no_orders: "Nothing found", profile: "Profile", show_all: "Show all", buyer: "Seller", projects_on_exchange: "Projects", hired_on: "Success rate", rest_time: "Time: 1-3 days", review_btn: "View", order: "Order", reviews_count: "Reviews", delete: "Delete", btn_rate: "⭐ Rate", modal_review_title: "Leave a review", ph_review: "Write a few words about the work...", btn_send_review: "Send review", review_success: "Thank you for your review!" },
+    PL: { fav_only: "Moje ulubione", payment_notice: "Tryb testowy (Płatności wyłączone)", buy_now: "Zapłać", title: "UNIT Marketplace — Usługi Cyfrowe", sub: "OGŁOSZENIA", search: "Znajdź usługi", track_orders: "Moje Zamówienia", admin: "ADMIN", login: "Zaloguj się", logout: "Wyloguj", register: "Rejestracja", pass_q: "Hasło", auth_req: "Zaloguj się, aby kontynuować", no_acc: "Brak konta?", has_acc: "Masz już konto?", msg: "Zamówienie przyjęte!", rub_cat: "Kategorie", rub_bud: "Budżet", cat_all: "Wszystko", cat_design: "Design", cat_dev: "Programowanie i IT", cat_text: "Teksty i Tłumaczenia", cat_seo: "SEO i Ruch", cat_social: "Media Społecznościowe", cat_audio: "Audio i Wideo", cat_bus: "Biznes i Życie", regulations: "Regulamin", rodo: "Polityka prywatności (RODO)", footer_rights: "Wszelkie prawa zastrzeżone.", no_orders: "Nic nie znaleziono", profile: "Profil", show_all: "Pokaż wszystko", buyer: "Sprzedawca", projects_on_exchange: "Projekty", hired_on: "Sukces", rest_time: "Czas: 1-3 dni", review_btn: "Zobacz", order: "Zamów", reviews_count: "Opinie", delete: "Usuń", btn_rate: "⭐ Oceń", modal_review_title: "Zostaw opinię", ph_review: "Napisz kilka słów o pracy...", btn_send_review: "Wyślij opinię", review_success: "Dziękujemy za Twoją opinię!" },
+    DE: { fav_only: "Meine Favoriten", payment_notice: "Testmodus (Zahlungen deaktiviert)", buy_now: "Bezahlen", title: "UNIT Marketplace — Digitale Dienste", sub: "ANZEIGEN", search: "Dienste finden", track_orders: "Meine Bestellungen", admin: "ADMIN", login: "Anmelden", logout: "Abmelden", register: "Registrieren", pass_q: "Passwort", auth_req: "Bitte einloggen, um fortzufahren", no_acc: "Kein Konto?", has_acc: "Bereits ein Konto?", msg: "Bestellung angenommen!", rub_cat: "Kategorien", rub_bud: "Budget", cat_all: "Alle", cat_design: "Design", cat_dev: "Entwicklung & IT", cat_text: "Texte & Übersetzungen", cat_seo: "SEO & Traffic", cat_social: "Soziale Medien", cat_audio: "Audio & Video", cat_bus: "Business & Leben", regulations: "Nutzungsbedingungen", rodo: "Datenschutzerklärung (DSGVO)", footer_rights: "Alle Rechte vorbehalten.", no_orders: "Nichts gefunden", profile: "Kabinett", show_all: "Alles anzeigen", buyer: "Verkäufer", projects_on_exchange: "Projekte", hired_on: "Erfolgsquote", rest_time: "Zeit: 1-3 Tage", review_btn: "Ansehen", order: "Bestellen", reviews_count: "Bewertungen", delete: "Löschen", btn_rate: "⭐ Bewerten", modal_review_title: "Bewertung hinterlassen", ph_review: "Schreibe ein paar Worte über die Arbeit...", btn_send_review: "Bewertung senden", review_success: "Danke für deine Bewertung!" },
+    ES: { fav_only: "Mis favoritos", payment_notice: "Modo de prueba (Pagos desactivados)", buy_now: "Pagar", title: "UNIT Marketplace — Servicios Digitales", sub: "ANUNCIOS", search: "Buscar servicios", track_orders: "Mis Pedidos", admin: "ADMIN", login: "Iniciar sesión", logout: "Cerrar sesión", register: "Regístrate", pass_q: "Contraseña", auth_req: "Inicie sesión para continuar", no_acc: "¿No tienes cuenta?", has_acc: "¿Ya tienes cuenta?", msg: "¡Pedido aceptado!", rub_cat: "Categorías", rub_bud: "Presupuesto", cat_all: "Todo", cat_design: "Diseño", cat_dev: "Desarrollo y TI", cat_text: "Textos y Traducción", cat_seo: "SEO y Tráfico", cat_social: "Redes Sociales", cat_audio: "Audio y Video", cat_bus: "Negocios y Vida", regulations: "Términos de servicio", rodo: "Política de privacidad (RGPD)", footer_rights: "Todos los derechos reservados.", no_orders: "Nada encontrado", profile: "Perfil", show_all: "Mostrar todo", buyer: "Vendedor", projects_on_exchange: "Proyectos", hired_on: "Éxito", rest_time: "Tiempo: 1-3 días", review_btn: "Ver", order: "Pedir", reviews_count: "Reseñas", delete: "Eliminar", btn_rate: "⭐ Calificar", modal_review_title: "Deja una reseña", ph_review: "Escribe algunas palabras sobre el trabajo...", btn_send_review: "Enviar reseña", review_success: "¡Gracias por tu reseña!" },
+    IT: { fav_only: "I miei preferiti", payment_notice: "Modalità test (Pagamenti disabilitati)", buy_now: "Paga", title: "UNIT Marketplace — Servizi Digitali", sub: "ANNUNCI", search: "Trova servizi", track_orders: "I miei ordini", admin: "ADMIN", login: "Accedi", logout: "Esci", register: "Iscriviti", pass_q: "Password", auth_req: "Accedi per continuare", no_acc: "Nessun account?", has_acc: "Hai già un account?", msg: "Ordine accettato!", rub_cat: "Categorie", rub_bud: "Budget", cat_all: "Tutto", cat_design: "Design", cat_dev: "Sviluppo e IT", cat_text: "Testi e Traduzioni", cat_seo: "SEO e Traffico", cat_social: "Social Media", cat_audio: "Audio e Video", cat_bus: "Affari e Vita", regulations: "Termini di servizio", rodo: "Informativa sulla privacy (GDPR)", footer_rights: "Tutti i diritti riservati.", no_orders: "Nessun risultato", profile: "Profilo", show_all: "Mostra tutto", buyer: "Venditore", projects_on_exchange: "Progetti", hired_on: "Successo", rest_time: "Tempo: 1-3 giorni", review_btn: "Visualizza", order: "Ordina", reviews_count: "Recensioni", delete: "Elimina", btn_rate: "⭐ Valuta", modal_review_title: "Lascia una recensione", ph_review: "Scrivi qualche parola sul lavoro...", btn_send_review: "Invia recensione", review_success: "Grazie per la tua recensione!" },
+    FR: { fav_only: "Mes favoris", payment_notice: "Mode test (Paiements désactivés)", buy_now: "Payer", title: "UNIT Marketplace — Services Numériques", sub: "ANNONCES", search: "Trouver des services", track_orders: "Mes commandes", admin: "ADMIN", login: "Se connecter", logout: "Se déconnecter", register: "S'inscrire", pass_q: "Mot de passe", auth_req: "Veuillez vous connecter", no_acc: "Pas de compte?", has_acc: "Déjà un compte?", msg: "Commande acceptée!", rub_cat: "Catégories", rub_bud: "Budget", cat_all: "Tout", cat_design: "Design", cat_dev: "Développement et informatique", cat_text: "Textes et traduction", cat_seo: "SEO et trafic", cat_social: "Réseaux sociaux", cat_audio: "Audio et vidéo", cat_bus: "Affaires et vie", regulations: "Conditions d'utilisation", rodo: "Politique de confidentialité (RGPD)", footer_rights: "Tous droits réservés.", no_orders: "Rien n'a été trouvé", profile: "Profil", show_all: "Tout afficher", buyer: "Vendeur", projects_on_exchange: "Projets", hired_on: "Succès", rest_time: "Temps: 1-3 jours", review_btn: "Voir", order: "Commander", reviews_count: "Avis", delete: "Supprimer", btn_rate: "⭐ Évaluer", modal_review_title: "Laisser un avis", ph_review: "Écrivez quelques mots sur le travail...", btn_send_review: "Envoyer l'avis", review_success: "Merci pour votre avis !" }
   };
 
   const translate = (key: string) => (t[lang] && t[lang][key]) ? t[lang][key] : t['EN'][key] || key;
@@ -68,7 +72,6 @@ export default function HomePage() {
     { id: 'BUSINESS', icon: '💼', titleKey: 'cat_bus' }
   ];
 
-  // --- ОБРАБОТЧИКИ СОХРАНЕНИЯ В ПАМЯТЬ ---
   const handleLangChange = (newLang: string) => {
     setLang(newLang);
     localStorage.setItem('unit_lang', newLang);
@@ -83,7 +86,6 @@ export default function HomePage() {
   useEffect(() => {
     let isMounted = true;
 
-    // Загрузка глобальных настроек языка
     const initSettings = async () => {
       const savedLang = localStorage.getItem('unit_lang');
       if (savedLang && isMounted) setLang(savedLang);
@@ -93,32 +95,21 @@ export default function HomePage() {
 
       try {
         const { data } = await supabase.from('settings').select('value').eq('key', 'payment_enabled').single();
-        if (data && isMounted) {
-          setPaymentEnabled(data.value === 'true');
-        }
+        if (data && isMounted) setPaymentEnabled(data.value === 'true');
       } catch (e) {}
     };
 
     initSettings();
 
-    // Загрузка данных
     const fetchServices = async () => {
       try {
-        const { data, error } = await supabase
-          .from('services')
-          .select('*')
-          .order('created_at', { ascending: false });
-        if (isMounted) {
-          if (data) setServices(data);
-          setLoading(false);
-        }
-      } catch (err) {
-        if (isMounted) setLoading(false);
-      }
+        const { data } = await supabase.from('services').select('*').order('created_at', { ascending: false });
+        if (isMounted && data) setServices(data);
+        setLoading(false);
+      } catch (err) { if (isMounted) setLoading(false); }
     };
     fetchServices();
 
-    // Проверка сессии
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (isMounted) setUser(session?.user ?? null);
     });
@@ -127,20 +118,31 @@ export default function HomePage() {
       if (isMounted) setUser(session?.user ?? null);
     });
 
-    return () => {
-      isMounted = false;
-      subscription?.unsubscribe();
-    };
+    return () => { isMounted = false; subscription?.unsubscribe(); };
   }, []);
+
+  // --- ДОБАВЛЕНО: ЗАГРУЗКА ЗАКЛАДОК ---
+  useEffect(() => {
+    let isMounted = true;
+    if (user) {
+      supabase.from('favorites').select('service_id').eq('user_email', user.email)
+        .then(({ data }) => {
+          if (isMounted && data) setFavorites(data.map(f => f.service_id));
+        });
+    } else {
+      if (isMounted) {
+        setFavorites([]);
+        setShowFavoritesOnly(false);
+      }
+    }
+    return () => { isMounted = false; };
+  }, [user]);
 
   // --- ЛОГИКА ---
   const handleAdminLogin = () => {
     const pass = prompt("Password:");
-    if (pass === "123") {
-      router.push('/dashboard'); 
-    } else {
-      alert("Invalid password");
-    }
+    if (pass === "123") router.push('/dashboard'); 
+    else alert("Invalid password");
   };
 
   const handleAuth = async () => {
@@ -152,10 +154,7 @@ export default function HomePage() {
     } else {
       const { error } = await supabase.auth.signUp({ email: authEmail, password: authPassword });
       if (error) alert(error.message);
-      else {
-        alert("Success! Now login.");
-        setAuthIsLogin(true); 
-      }
+      else { alert("Success! Now login."); setAuthIsLogin(true); }
     }
     setAuthLoading(false);
   };
@@ -184,68 +183,55 @@ export default function HomePage() {
   };
 
   const handleOpenTracker = async () => {
-    if (!user) {
-      setShowAuthModal(true);
-      return;
-    }
+    if (!user) { setShowAuthModal(true); return; }
     setShowTracker(true);
     setTrackingLoading(true);
-    const { data, error } = await supabase
-      .from('orders')
-      .select('*, services(title)')
-      .eq('client_email', user.email)
-      .order('created_at', { ascending: false });
-      
-    if (data) setUserOrders(data);
-    else setUserOrders([]);
-    
+    const { data } = await supabase.from('orders').select('*, services(title)').eq('client_email', user.email).order('created_at', { ascending: false });
+    setUserOrders(data || []);
     setTrackingLoading(false);
   };
 
   const handleOrder = async (service_id: string, service_title: string) => {
-    if (!user) {
-      alert(translate('auth_req'));
-      setShowAuthModal(true);
-      return;
-    }
+    if (!user) { alert(translate('auth_req')); setShowAuthModal(true); return; }
 
     if (paymentEnabled) {
       alert(translate('buy_now') + ": " + service_title + " (Redirecting to Stripe...)");
       return; 
     }
 
-    const email = user.email;
-    const { error } = await supabase.from('orders').insert([
-      { service_id, client_email: email, status: 'New' }
-    ]);
+    const { error } = await supabase.from('orders').insert([{ service_id, client_email: user.email, status: 'New' }]);
 
     if (!error) {
       alert(translate('msg'));
-      
       try {
         const currentService = services.find(s => s.id === service_id);
-        const message = `🚀 НОВЫЙ ЗАКАЗ!\n\n📦 Услуга: ${service_title}\n📧 Клиент: ${email}\n💰 Сумма: ${displayPrice(currentService?.price || 0)}`;
+        const message = `🚀 НОВЫЙ ЗАКАЗ!\n\n📦 Услуга: ${service_title}\n📧 Клиент: ${user.email}\n💰 Сумма: ${displayPrice(currentService?.price || 0)}`;
+        await fetch('/api/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: message }) });
+      } catch (apiError) {}
+    } else { alert("Ошибка: " + error.message); }
+  };
 
-        await fetch('/api/send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: message })
-        });
-      } catch (apiError) {
-        console.error("Ошибка отправки:", apiError);
-      }
+  // --- ДОБАВЛЕНО: ТОГГЛ ЗАКЛАДКИ ---
+  const handleToggleFavorite = async (serviceId: string) => {
+    if (!user) {
+      alert(translate('auth_req'));
+      setShowAuthModal(true);
+      return;
+    }
+    const isFav = favorites.includes(serviceId);
+    if (isFav) {
+      setFavorites(favorites.filter(id => id !== serviceId));
+      await supabase.from('favorites').delete().eq('user_email', user.email).eq('service_id', serviceId);
     } else {
-      alert("Ошибка: " + error.message);
+      setFavorites([...favorites, serviceId]);
+      await supabase.from('favorites').insert([{ user_email: user.email, service_id: serviceId }]);
     }
   };
 
-  // ФУНКЦИЯ ОТПРАВКИ ОТЗЫВА
   const handleSubmitReview = async () => {
     if (!reviewModal) return;
     setIsSubmittingReview(true);
-
     await supabase.from('orders').update({ rating, review_text: reviewText }).eq('id', reviewModal.orderId);
-
     const { data: allReviews } = await supabase.from('orders').select('rating').eq('service_id', reviewModal.serviceId).not('rating', 'is', null);
     
     if (allReviews && allReviews.length > 0) {
@@ -263,14 +249,14 @@ export default function HomePage() {
   };
 
   const toggleBudgetRange = (rangeId: string) => {
-    if (budgetRanges.includes(rangeId)) {
-      setBudgetRanges(budgetRanges.filter(id => id !== rangeId));
-    } else {
-      setBudgetRanges([...budgetRanges, rangeId]);
-    }
+    if (budgetRanges.includes(rangeId)) setBudgetRanges(budgetRanges.filter(id => id !== rangeId));
+    else setBudgetRanges([...budgetRanges, rangeId]);
   };
 
   const filteredServices = services.filter(s => {
+    // --- ДОБАВЛЕНО: ФИЛЬТР ЗАКЛАДОК ---
+    if (showFavoritesOnly && !favorites.includes(s.id)) return false;
+
     if (activeCategory !== 'ALL' && s.category !== activeCategory) return false;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -301,7 +287,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* HEADER (Адаптивный) */}
+      {/* HEADER */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-[1240px] mx-auto px-3 sm:px-4 h-[70px] flex items-center justify-between gap-2 sm:gap-6">
           <Link href="/" className="text-[26px] sm:text-[32px] font-black tracking-tighter cursor-pointer flex-shrink-0">
@@ -389,6 +375,16 @@ export default function HomePage() {
                 <input type="number" placeholder={`До ${currency}`} value={budgetMax} onChange={(e) => setBudgetMax(e.target.value)} className="w-full h-[36px] border border-gray-300 rounded-[4px] px-3 text-[13px] outline-none focus:border-[#11a95e] transition-colors" />
               </div>
             </div>
+
+            {/* --- ДОБАВЛЕНО: КНОПКА ФИЛЬТРА ЗАКЛАДОК В МЕНЮ --- */}
+            {user && (
+              <div className="pt-6 border-t border-gray-100">
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <input type="checkbox" checked={showFavoritesOnly} onChange={() => setShowFavoritesOnly(!showFavoritesOnly)} className="w-[16px] h-[16px] rounded-[4px] border-gray-300 text-red-500 focus:ring-red-500" />
+                  <span className="text-[13.5px] font-bold text-[#222]">❤️ {translate('fav_only')}</span>
+                </label>
+              </div>
+            )}
           </aside>
 
           <section className="flex-1 space-y-4 w-full overflow-hidden">
@@ -408,6 +404,9 @@ export default function HomePage() {
                   translate={translate} 
                   handleOrder={() => handleOrder(s.id, s.title)} 
                   deleteService={() => {}}
+                  // Передаем пропсы в карточку
+                  isFavorite={favorites.includes(s.id)}
+                  toggleFavorite={() => handleToggleFavorite(s.id)}
                 />
               ))
             )}
@@ -415,7 +414,7 @@ export default function HomePage() {
         </div>
       </main>
 
-      {/* FOOTER (ВОССТАНОВЛЕН) */}
+      {/* FOOTER */}
       <footer className="bg-white border-t border-gray-200 py-6 mt-auto">
         <div className="max-w-[1240px] mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4 text-[13px] text-gray-500 font-medium">
           <div>&copy; {new Date().getFullYear()} UNIT. {translate('footer_rights')}</div>
@@ -430,7 +429,7 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* АВТОРИЗАЦИЯ */}
+      {/* МОДАЛКИ (Без изменений) */}
       {showAuthModal && (
         <div className="fixed inset-0 z-[300] bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-sm rounded-[12px] p-8 shadow-2xl">
@@ -455,7 +454,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ТРЕКЕР ЗАКАЗОВ */}
       {showTracker && (
         <div className="fixed inset-0 z-[100] bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-lg rounded-[12px] p-6 shadow-2xl relative">
@@ -494,7 +492,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* МОДАЛЬНОЕ ОКНО ОТЗЫВА */}
       {reviewModal && (
         <div className="fixed inset-0 z-[400] bg-gray-900/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-sm rounded-[16px] p-8 shadow-2xl relative text-center">

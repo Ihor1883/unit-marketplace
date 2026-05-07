@@ -8,14 +8,32 @@ export default function ServiceCard({
   displayPrice,
   translate,
   handleOrder,
-  deleteService
+  deleteService,
+  isFavorite, // <-- ДОБАВЛЕН ПРОП
+  toggleFavorite // <-- ДОБАВЛЕН ПРОП
 }: any) {
   return (
     <div className="bg-white rounded-[8px] border border-gray-200 p-5 shadow-sm hover:shadow-lg hover:border-[#11a95e]/40 transition-all duration-300 relative group">
       
-      {/* Badge с ценой */}
-      <div className="absolute top-5 right-5 text-[#11a95e] font-bold bg-[#eaf6f0] px-3 py-1 rounded-[4px] text-[13px] tracking-wide border border-[#11a95e]/10">
-        {displayPrice(service.price)}
+      {/* ПРАВЫЙ ВЕРХНИЙ УГОЛ: СЕРДЕЧКО И ЦЕНА */}
+      <div className="absolute top-5 right-5 flex items-center gap-3">
+        {/* Кнопка "В избранное" */}
+        <button 
+          onClick={(e) => { e.preventDefault(); toggleFavorite(); }} 
+          className={`transition-all duration-200 hover:scale-110 active:scale-95 ${
+            isFavorite ? 'text-red-500 hover:text-red-600 drop-shadow-sm' : 'text-gray-300 hover:text-red-400'
+          }`}
+          title="В закладки"
+        >
+          <svg className="w-6 h-6" fill={isFavorite ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={isFavorite ? "1" : "2"} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+          </svg>
+        </button>
+
+        {/* Badge с ценой */}
+        <div className="text-[#11a95e] font-bold bg-[#eaf6f0] px-3 py-1 rounded-[4px] text-[13px] tracking-wide border border-[#11a95e]/10">
+          {displayPrice(service.price)}
+        </div>
       </div>
 
       {/* ЗАГОЛОВОК С ПРАВИЛЬНОЙ ССЫЛКОЙ */}
