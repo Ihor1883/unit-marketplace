@@ -9,29 +9,17 @@ export default function ServiceCard({
   translate,
   handleOrder,
   deleteService,
-  isFavorite, 
-  toggleFavorite,
-  isTop // <-- Метка Топ-объявления
+  isFavorite, // <-- ДОБАВЛЕН ПРОП
+  toggleFavorite // <-- ДОБАВЛЕН ПРОП
 }: any) {
   return (
-    <div className={`rounded-[8px] border p-5 transition-all duration-300 relative group ${
-      isTop 
-        ? 'bg-[#fffdf7] border-yellow-400 shadow-md shadow-yellow-100 hover:shadow-xl hover:shadow-yellow-200/50' 
-        : 'bg-white border-gray-200 shadow-sm hover:shadow-lg hover:border-[#11a95e]/40'
-    }`}>
+    <div className="bg-white rounded-[8px] border border-gray-200 p-5 shadow-sm hover:shadow-lg hover:border-[#11a95e]/40 transition-all duration-300 relative group">
       
-      {/* ПЛАШКА ТОП */}
-      {isTop && (
-        <div className="absolute -top-3 left-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-sm flex items-center gap-1">
-          🚀 TOP
-        </div>
-      )}
-
       {/* ПРАВЫЙ ВЕРХНИЙ УГОЛ: СЕРДЕЧКО И ЦЕНА */}
       <div className="absolute top-5 right-5 flex items-center gap-3">
         {/* Кнопка "В избранное" */}
         <button 
-          onClick={(e) => { e.preventDefault(); toggleFavorite && toggleFavorite(); }} 
+          onClick={(e) => { e.preventDefault(); toggleFavorite(); }} 
           className={`transition-all duration-200 hover:scale-110 active:scale-95 ${
             isFavorite ? 'text-red-500 hover:text-red-600 drop-shadow-sm' : 'text-gray-300 hover:text-red-400'
           }`}
@@ -50,7 +38,7 @@ export default function ServiceCard({
 
       {/* ЗАГОЛОВОК С ПРАВИЛЬНОЙ ССЫЛКОЙ */}
       <Link href={`/service/${service.id}`}>
-        <h2 className="text-[18px] font-extrabold text-[#11a95e] group-hover:underline cursor-pointer pr-36 mb-2 line-clamp-1 mt-1">
+        <h2 className="text-[18px] font-extrabold text-[#11a95e] group-hover:underline cursor-pointer pr-36 mb-2 line-clamp-1">
           {service.title}
         </h2>
       </Link>
@@ -75,7 +63,7 @@ export default function ServiceCard({
         </div>
         <div className="text-[13px] text-gray-800 space-y-1">
           <div className="flex items-center gap-1.5">
-            <span className="text-yellow-500">⭐ {service.rating_avg ?? '5.0'}</span>
+            <span className="text-yellow-500">⭐ {service.rating ?? '5.0'}</span>
             <span className="text-gray-300">|</span>
             <span>
               {translate('buyer')}:{' '}
