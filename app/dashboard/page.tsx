@@ -67,7 +67,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // 3. Удаление любой услуги (визитки)
+  // 3. Удаление услуги
   const deleteServiceAdmin = async (id: string) => {
     if (!confirm("Вы уверены, что хотите безвозвратно удалить эту услугу?")) return;
     const { error } = await supabase.from('services').delete().eq('id', id);
@@ -76,6 +76,18 @@ export default function AdminDashboard() {
       alert("Услуга удалена!");
     } else {
       alert("Ошибка удаления: " + error.message);
+    }
+  };
+
+  // 4. Включение/Выключение ТОП-статуса
+  const toggleTopStatus = async (id: string, currentStatus: boolean) => {
+    const newStatus = !currentStatus;
+    const { error } = await supabase.from('services').update({ is_top: newStatus }).eq('id', id);
+    
+    if (!error) {
+      setAllServices(allServices.map(s => s.id === id ? { ...s, is_top: newStatus } : s));
+    } else {
+      alert("Ошибка обновления ТОП статуса: " + error.message);
     }
   };
 
@@ -140,7 +152,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* ТАБЛИЦА ЗАКАЗОВ (УПРАВЛЕНИЕ СТАТУСАМИ) */}
+        {/* ТАБЛИЦА ЗАКАЗОВ */}
         <div className="bg-white rounded-[12px] shadow-sm border border-gray-200 overflow-hidden mb-8">
           <div className="px-6 py-4 border-b border-gray-100">
             <h3 className="font-extrabold text-[16px] text-[#222]">Управление заказами</h3>
@@ -197,10 +209,10 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* ТАБЛИЦА УСЛУГ (УДАЛЕНИЕ ВИЗИТОК) */}
+        {/* ТАБЛИЦА УСЛУГ (С КНОПКОЙ "В ТОП") */}
         <div className="bg-white rounded-[12px] shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h3 className="font-extrabold text-[16px] text-[#222]">Управление услугами (визитками)</h3>
+          <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+            <h3 className="font-extrabold text-[16px] text-[#222]">Управление визитками (ТОП и Удаление)</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -210,7 +222,7 @@ export default function AdminDashboard() {
                   <th className="p-4">Название</th>
                   <th className="p-4">Продавец</th>
                   <th className="p-4">Цена</th>
-                  <th className="p-4 pr-6 text-right">Действие</th>
+                  <th className="p-4 pr-6 text-right">Управление</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-[13px]">
@@ -220,7 +232,7 @@ export default function AdminDashboard() {
                   <tr><td colSpan={5} className="p-8 text-center text-gray-400 font-medium">Услуг пока нет</td></tr>
                 ) : (
                   allServices.map(service => (
-                    <tr key={service.id} className="hover:bg-gray-50/50 transition-colors">
+                    <tr key={service.id} className={`hover:bg-gray-50/50 transition-colors ${service.is_top ? 'bg-yellow-50/30' : ''}`}>
                       <td className="p-4 pl-6">
                         {service.image_url ? (
                           <img src={service.image_url} alt="Cover" className="w-12 h-12 object-cover rounded-[6px] border border-gray-200" />
@@ -228,16 +240,32 @@ export default function AdminDashboard() {
                           <div className="w-12 h-12 bg-gray-100 rounded-[6px] border border-gray-200 flex items-center justify-center text-[10px] text-gray-400">Нет фото</div>
                         )}
                       </td>
-                      <td className="p-4 font-bold text-[#222] max-w-[200px] truncate">{service.title}</td>
+                      <td className="p-4">
+                        <div className="font-bold text-[#222] max-w-[200px] truncate">{service.title}</div>
+                        {service.is_top && <span className="text-[10px] font-black text-yellow-600 uppercase tracking-widest bg-yellow-100 px-1.5 py-0.5 rounded">ТОП</span>}
+                      </td>
                       <td className="p-4 text-gray-600">{service.seller_email}</td>
                       <td className="p-4 font-black text-[#11a95e]">{service.price}</td>
                       <td className="p-4 pr-6 text-right">
-                        <button 
-                          onClick={() => deleteServiceAdmin(service.id)}
-                          className="bg-red-50 text-red-500 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-[6px] text-[12px] font-bold transition-colors"
-                        >
-                          Удалить
-                        </button>
+                        <div className="flex justify-end gap-2">
+                          <button 
+                            onClick={() => toggleTopStatus(service.id, service.is_top)}
+                            className={`px-3 py-1.5 rounded-[6px] text-[12px] font-bold transition-colors border ${
+                              service.is_top 
+                                ? 'bg-yellow-100 text-yellow-700 border-yellow-300 hover:bg-yellow-200' 
+                                : 'bg-white text-gray-500 border-gray-300 hover:bg-gray-50'
+                            }`}
+                          >
+                            {service.is_top ? '⭐ Снять ТОП' : '🚀 В ТОП'}
+                          </button>
+                          
+                          <button 
+                            onClick={() => deleteServiceAdmin(service.id)}
+                            className="bg-red-50 text-red-500 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-[6px] text-[12px] font-bold transition-colors"
+                          >
+                            Удалить
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
