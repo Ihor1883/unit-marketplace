@@ -2,11 +2,18 @@ import { Metadata } from 'next';
 import { supabase } from '../../supabase';
 import ServiceClient from './ServiceClient';
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+// 1. ЗАПРЕЩАЕМ КЭШИРОВАНИЕ: Заставляем Vercel всегда запрашивать свежие данные
+export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({ params }: { params: any }): Promise<Metadata> {
+  // 2. РАСПАКОВКА ПАРАМЕТРОВ (Фикс для новых версий Next.js)
+  const resolvedParams = await params;
+  const serviceId = resolvedParams.id;
+
   const { data: service } = await supabase
     .from('services')
     .select('title, description, image_url')
-    .eq('id', params.id)
+    .eq('id', serviceId)
     .single();
 
   if (!service) {
