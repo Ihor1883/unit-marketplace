@@ -2,8 +2,6 @@ import { Metadata } from 'next';
 import { supabase } from '../../supabase';
 import ServiceClient from './ServiceClient';
 
-// 1. Эта серверная функция выполняется ДО загрузки страницы.
-// Она достает данные из базы и генерирует красивые теги для Telegram/WhatsApp
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const { data: service } = await supabase
     .from('services')
@@ -15,7 +13,6 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     return { title: 'Услуга не найдена | UNIT' };
   }
 
-  // Обрезаем описание, чтобы оно красиво смотрелось в мессенджере
   const shortDescription = service.description 
     ? service.description.substring(0, 150) + '...' 
     : 'Смотрите подробности на сайте';
@@ -40,7 +37,6 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   };
 }
 
-// 2. А это сам компонент, который просто отдает всю визуальную часть клиенту
 export default function Page() {
   return <ServiceClient />;
 }
