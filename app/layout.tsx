@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Toaster } from 'react-hot-toast'; // ДОБАВИЛИ ИМПОРТ
+import { Toaster } from 'react-hot-toast'; // <-- ЭТОТ ИМПОРТ ОЧЕНЬ ВАЖЕН
 import './globals.css'; 
 
 export const metadata: Metadata = {
@@ -38,7 +38,8 @@ export default function RootLayout({
     <html lang="ru" suppressHydrationWarning>
       <body className="bg-[#F3F4F6] text-[#333] antialiased">
         {children}
-        {/* ДОБАВИЛИ КОМПОНЕНТ УВЕДОМЛЕНИЙ (будут всплывать снизу справа) */}
+        
+        {/* А ЭТОТ КОМПОНЕНТ ОТВЕЧАЕТ ЗА ВЫВОД ПЛАШЕК НА ЭКРАН */}
         <Toaster position="bottom-right" reverseOrder={false} />
       </body>
     </html>
