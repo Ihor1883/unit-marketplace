@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../supabase'; 
 import { useParams, useRouter } from 'next/navigation'; 
 import Link from 'next/link'; 
+import toast from 'react-hot-toast'; // <-- ДОБАВЛЕН ИМПОРТ TOAST
 
 export default function ServicePage() {
   const params = useParams();
@@ -23,7 +24,7 @@ export default function ServicePage() {
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // --- СЛОВАРЬ (ДОБАВЛЕН УСПЕШНЫЙ ЗАКАЗ) ---
+  // --- СЛОВАРЬ ---
   const t: Record<string, any> = {
     RU: {
       loading_service: "Загрузка услуги...", service_not_found: "Услуга не найдена :(", back_to_main: "Вернуться на главную", back_to_list: "Вернуться к списку", category_label: "Рубрика", about_service: "Об услуге", customer_reviews: "Отзывы покупателей", rate_seller: "Оцените работу продавца:", review_placeholder: "Расскажите, как прошло сотрудничество...", submitting: "Отправка...", publish_review: "Опубликовать отзыв", login_to_review: "Войдите в аккаунт, чтобы оставить отзыв об этой услуге.", no_reviews_yet: "Пока нет ни одного отзыва. Станьте первым!", quality_guarantee: "Гарантия качества", direct_communication: "Связь напрямую с исполнителем", post_support: "Поддержка после сдачи", order_for: "Заказать за", safe_deal: "Безопасная сделка P2P", reviews_count_text: "отзывов", created_services: "Создано услуг", successfully_delivered: "Успешно сдано", alert_login_review: "Пожалуйста, войдите в аккаунт на главной странице, чтобы оставить отзыв.", alert_empty_review: "Пожалуйста, напишите текст отзыва.", alert_review_success: "Отзыв успешно опубликован!", alert_review_error: "Ошибка при отправке: ", alert_login_order: "Для заказа войдите в аккаунт на главной странице!", order_success: "Заказ успешно оформлен! Вы можете отслеживать его в 'Мои заказы'.",
@@ -137,11 +138,11 @@ export default function ServicePage() {
   // Логика отправки нового отзыва
   const submitReview = async () => {
     if (!user) {
-      alert(translate('alert_login_review'));
+      toast.error(translate('alert_login_review')); // <-- TOAST ВМЕСТО ALERT
       return;
     }
     if (!newComment.trim()) {
-      alert(translate('alert_empty_review'));
+      toast.error(translate('alert_empty_review')); // <-- TOAST ВМЕСТО ALERT
       return;
     }
 
@@ -174,10 +175,10 @@ export default function ServicePage() {
         }).eq('id', service.id);
 
         setService({ ...service, rating: avgRating, reviews_count: updatedReviews.length });
-        alert(translate('alert_review_success'));
+        toast.success(translate('alert_review_success')); // <-- TOAST ВМЕСТО ALERT
       }
     } catch (error: any) {
-      alert(translate('alert_review_error') + error.message);
+      toast.error(translate('alert_review_error') + error.message); // <-- TOAST ВМЕСТО ALERT
     } finally {
       setIsSubmitting(false);
     }
@@ -186,7 +187,7 @@ export default function ServicePage() {
   // --- ИСПРАВЛЕНА ЛОГИКА ЗАКАЗА: Создаем заказ прямо здесь ---
   const handleOrder = async () => {
     if (!user) {
-      alert(translate('alert_login_order'));
+      toast.error(translate('alert_login_order')); // <-- TOAST ВМЕСТО ALERT
       router.push('/');
       return;
     }
@@ -196,7 +197,7 @@ export default function ServicePage() {
     ]);
 
     if (!error) {
-      alert(translate('order_success'));
+      toast.success(translate('order_success'), { duration: 4000 }); // <-- TOAST ВМЕСТО ALERT
       
       // Отправляем уведомление в Telegram
       try {
@@ -210,7 +211,7 @@ export default function ServicePage() {
         console.error("Ошибка отправки:", apiError);
       }
     } else {
-      alert("Ошибка оформления заказа: " + error.message);
+      toast.error("Ошибка оформления заказа: " + error.message); // <-- TOAST ВМЕСТО ALERT
     }
   };
 
