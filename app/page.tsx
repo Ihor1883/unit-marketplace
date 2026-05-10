@@ -292,22 +292,38 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* HEADER (Адаптивный + ВСЕ 7 ЯЗЫКОВ) */}
+      {/* HEADER (Адаптивный + ВСЕ 7 ЯЗЫКОВ + Умный поиск) */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-[1240px] mx-auto px-3 sm:px-4 h-[70px] flex items-center justify-between gap-2 sm:gap-6">
           <Link href="/" className="text-[26px] sm:text-[32px] font-black tracking-tighter cursor-pointer flex-shrink-0">
             UNIT<span className="text-[#11a95e]">.</span>
           </Link>
 
-          <div className="flex-1 max-w-[700px] hidden md:flex h-[42px] border border-[#d9d9d9] rounded hover:border-[#b0b0b0] focus-within:border-[#11a95e] shadow-inner">
-            <input type="text" placeholder={translate('search')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full px-4 text-[14px] outline-none" />
-            <button className="bg-[#11a95e] hover:bg-[#0e9552] w-[54px] flex items-center justify-center shrink-0">
+          {/* Улучшенная строка поиска */}
+          <div className="flex-1 max-w-[700px] flex h-[40px] sm:h-[42px] border border-[#d9d9d9] rounded hover:border-[#b0b0b0] focus-within:border-[#11a95e] shadow-inner bg-white relative">
+            <input 
+              type="text" 
+              placeholder={translate('search')} 
+              value={searchQuery} 
+              onChange={(e) => setSearchQuery(e.target.value)} 
+              className="w-full px-4 text-[14px] outline-none rounded-l" 
+            />
+            {/* Кнопка очистки */}
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery('')}
+                className="absolute right-[50px] sm:right-[54px] top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 px-2 text-lg"
+              >
+                ×
+              </button>
+            )}
+            <button className="bg-[#11a95e] hover:bg-[#0e9552] w-[50px] sm:w-[54px] flex items-center justify-center shrink-0 rounded-r transition-colors">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </button>
           </div>
 
           <div className="flex items-center gap-3 sm:gap-5 text-[12px] sm:text-[14px] font-medium ml-auto whitespace-nowrap">
-            <div className="flex items-center gap-1.5 sm:gap-3 border-r border-gray-200 pr-3 sm:pr-4">
+            <div className="flex items-center gap-1.5 sm:gap-3 border-r border-gray-200 pr-3 sm:pr-4 hidden md:flex">
               {/* ВОЗВРАЩЕНЫ 7 ЯЗЫКОВ */}
               <select value={lang} onChange={(e) => handleLangChange(e.target.value)} className="text-[12px] sm:text-[13px] font-bold outline-none cursor-pointer bg-transparent">
                 <option value="RU">RU</option>
@@ -403,8 +419,22 @@ export default function HomePage() {
             {loading ? (
               <div className="p-10 text-center animate-pulse text-gray-400 font-medium">Loading...</div>
             ) : sortedServices.length === 0 ? (
-               <div className="bg-white p-12 rounded-[8px] border border-dashed border-gray-300 text-center text-gray-500 font-medium">
-                {translate('no_orders')}
+               // ОБНОВЛЕННЫЙ БЛОК "НИЧЕГО НЕ НАЙДЕНО"
+               <div className="bg-white p-12 rounded-[8px] border border-dashed border-gray-300 text-center">
+                <div className="text-4xl mb-4">🔍</div>
+                <p className="text-gray-500 font-medium">
+                  {searchQuery 
+                    ? `${translate('no_orders')} по запросу "${searchQuery}"` 
+                    : translate('no_orders')}
+                </p>
+                {searchQuery && (
+                  <button 
+                    onClick={() => setSearchQuery('')}
+                    className="mt-4 text-[#11a95e] font-bold underline hover:text-[#0e9552]"
+                  >
+                    {translate('show_all')}
+                  </button>
+                )}
               </div>
             ) : (
               sortedServices.map((s) => (
