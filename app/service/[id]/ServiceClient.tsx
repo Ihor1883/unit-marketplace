@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../supabase'; 
 import { useParams, useRouter } from 'next/navigation'; 
 import Link from 'next/link'; 
-import toast from 'react-hot-toast'; // <-- ДОБАВЛЕН ИМПОРТ TOAST
+import toast from 'react-hot-toast';
 
 export default function ServicePage() {
   const params = useParams();
@@ -24,7 +24,7 @@ export default function ServicePage() {
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // --- СЛОВАРЬ ---
+  // --- СЛОВАРЬ (ПОЛНЫЙ, НА ВСЕ 7 ЯЗЫКОВ) ---
   const t: Record<string, any> = {
     RU: {
       loading_service: "Загрузка услуги...", service_not_found: "Услуга не найдена :(", back_to_main: "Вернуться на главную", back_to_list: "Вернуться к списку", category_label: "Рубрика", about_service: "Об услуге", customer_reviews: "Отзывы покупателей", rate_seller: "Оцените работу продавца:", review_placeholder: "Расскажите, как прошло сотрудничество...", submitting: "Отправка...", publish_review: "Опубликовать отзыв", login_to_review: "Войдите в аккаунт, чтобы оставить отзыв об этой услуге.", no_reviews_yet: "Пока нет ни одного отзыва. Станьте первым!", quality_guarantee: "Гарантия качества", direct_communication: "Связь напрямую с исполнителем", post_support: "Поддержка после сдачи", order_for: "Заказать за", safe_deal: "Безопасная сделка P2P", reviews_count_text: "отзывов", created_services: "Создано услуг", successfully_delivered: "Успешно сдано", alert_login_review: "Пожалуйста, войдите в аккаунт на главной странице, чтобы оставить отзыв.", alert_empty_review: "Пожалуйста, напишите текст отзыва.", alert_review_success: "Отзыв успешно опубликован!", alert_review_error: "Ошибка при отправке: ", alert_login_order: "Для заказа войдите в аккаунт на главной странице!", order_success: "Заказ успешно оформлен! Вы можете отслеживать его в 'Мои заказы'.",
@@ -138,11 +138,11 @@ export default function ServicePage() {
   // Логика отправки нового отзыва
   const submitReview = async () => {
     if (!user) {
-      toast.error(translate('alert_login_review')); // <-- TOAST ВМЕСТО ALERT
+      toast.error(translate('alert_login_review')); 
       return;
     }
     if (!newComment.trim()) {
-      toast.error(translate('alert_empty_review')); // <-- TOAST ВМЕСТО ALERT
+      toast.error(translate('alert_empty_review')); 
       return;
     }
 
@@ -175,19 +175,19 @@ export default function ServicePage() {
         }).eq('id', service.id);
 
         setService({ ...service, rating: avgRating, reviews_count: updatedReviews.length });
-        toast.success(translate('alert_review_success')); // <-- TOAST ВМЕСТО ALERT
+        toast.success(translate('alert_review_success')); 
       }
     } catch (error: any) {
-      toast.error(translate('alert_review_error') + error.message); // <-- TOAST ВМЕСТО ALERT
+      toast.error(translate('alert_review_error') + error.message); 
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // --- ИСПРАВЛЕНА ЛОГИКА ЗАКАЗА: Создаем заказ прямо здесь ---
+  // Логика оформления заказа
   const handleOrder = async () => {
     if (!user) {
-      toast.error(translate('alert_login_order')); // <-- TOAST ВМЕСТО ALERT
+      toast.error(translate('alert_login_order')); 
       router.push('/');
       return;
     }
@@ -197,9 +197,9 @@ export default function ServicePage() {
     ]);
 
     if (!error) {
-      toast.success(translate('order_success'), { duration: 4000 }); // <-- TOAST ВМЕСТО ALERT
+      toast.success(translate('order_success'), { duration: 4000 }); 
       
-      // Отправляем уведомление в Telegram
+      // Отправляем уведомление в Telegram (если настроено)
       try {
         const message = `🚀 НОВЫЙ ЗАКАЗ!\n\n📦 Услуга: ${service.title}\n📧 Клиент: ${user.email}\n💰 Сумма: ${displayPrice(service.price)}`;
         await fetch('/api/send', {
@@ -211,17 +211,17 @@ export default function ServicePage() {
         console.error("Ошибка отправки:", apiError);
       }
     } else {
-      toast.error("Ошибка оформления заказа: " + error.message); // <-- TOAST ВМЕСТО ALERT
+      toast.error("Ошибка оформления заказа: " + error.message); 
     }
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-[#F3F4F6] flex items-center justify-center font-bold text-gray-400">{translate('loading_service')}</div>;
+    return <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center font-bold text-gray-400">{translate('loading_service')}</div>;
   }
 
   if (!service) {
     return (
-      <div className="min-h-screen bg-[#F3F4F6] flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-[#F9FAFB] flex flex-col items-center justify-center">
         <h1 className="text-2xl font-bold text-[#222] mb-4">{translate('service_not_found')}</h1>
         <button onClick={() => router.push('/')} className="text-[#11a95e] hover:underline font-medium">{translate('back_to_main')}</button>
       </div>
@@ -229,175 +229,168 @@ export default function ServicePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F3F4F6] font-sans text-[#333] pb-20" suppressHydrationWarning>
+    <div className="min-h-screen bg-[#F9FAFB] font-sans text-[#333] pb-10" suppressHydrationWarning>
       
       {/* МИНИ-ШАПКА */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-[1240px] mx-auto px-4 h-[70px] flex items-center justify-between">
-          <Link href="/" className="text-[32px] font-black tracking-tighter cursor-pointer flex-shrink-0">
+      <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
+        <div className="max-w-[1200px] mx-auto px-4 h-[60px] flex items-center justify-between">
+          <Link href="/" className="text-[24px] font-black tracking-tighter text-[#222]">
             UNIT<span className="text-[#11a95e]">.</span>
           </Link>
-          
-          <Link href="/" className="text-[14px] font-bold text-gray-500 hover:text-[#11a95e] transition-colors flex items-center gap-2">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            {translate('back_to_list')}
+          <Link href="/" className="text-[13px] font-bold text-gray-400 hover:text-[#11a95e] flex items-center gap-2 transition-colors">
+            ← {translate('back_to_list')}
           </Link>
         </div>
       </header>
 
       {/* ОСНОВНОЙ КОНТЕНТ */}
-      <main className="max-w-[1240px] mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
+      <main className="max-w-[1200px] mx-auto px-4 py-6">
+        <div className="flex flex-col lg:flex-row gap-6 items-start">
           
-          {/* ЛЕВАЯ КОЛОНКА (Инфо об услуге) */}
-          <div className="flex-1 w-full space-y-6">
-            <div className="bg-white rounded-[12px] border border-gray-200 p-6 sm:p-8 shadow-sm">
-              <span className="inline-block bg-gray-100 text-gray-600 text-[12px] font-bold px-3 py-1 rounded-[4px] uppercase tracking-wider mb-4">
-                {translate('category_label')}: {translate(categories.find(c => c.id === service.category)?.titleKey || service.category)}
-              </span>
-              <h1 className="text-[26px] sm:text-[32px] font-extrabold text-[#222] mb-6 leading-tight">
+          {/* ЛЕВАЯ КОЛОНКА: Детали услуги */}
+          <div className="flex-1 w-full space-y-5">
+            <div className="bg-white rounded-2xl border border-gray-100 p-5 sm:p-7 shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                 <span className="bg-emerald-50 text-[#11a95e] text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider">
+                  {translate(categories.find(c => c.id === service.category)?.titleKey || service.category)}
+                </span>
+              </div>
+
+              <h1 className="text-[24px] sm:text-[28px] font-black text-[#222] mb-5 leading-tight">
                 {service.title}
               </h1>
               
-              {service.image_url ? (
-                <div className="w-full h-[300px] sm:h-[450px] rounded-[8px] overflow-hidden mb-8 border border-gray-100">
+              {/* Адаптивный контейнер картинки */}
+              <div className="w-full relative rounded-xl overflow-hidden mb-6 bg-gray-50 border border-gray-50 aspect-video lg:max-h-[400px]">
+                {service.image_url ? (
                   <img src={service.image_url} alt={service.title} className="w-full h-full object-cover" />
-                </div>
-              ) : (
-                <div className="w-full h-[200px] bg-emerald-50 rounded-[8px] flex items-center justify-center mb-8 border border-emerald-100">
-                  <span className="text-emerald-200 text-6xl">📸</span>
-                </div>
-              )}
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-4xl">📸</div>
+                )}
+              </div>
 
-              <h3 className="text-[20px] font-extrabold text-[#222] mb-4 border-b border-gray-100 pb-2">{translate('about_service')}</h3>
-              <div className="text-[15px] text-gray-700 leading-relaxed whitespace-pre-wrap">
+              <h3 className="text-[18px] font-bold text-[#222] mb-3">{translate('about_service')}</h3>
+              <div className="text-[14px] text-gray-600 leading-relaxed whitespace-pre-wrap">
                 {service.description}
               </div>
             </div>
 
             {/* БЛОК ОТЗЫВОВ */}
-            <div className="bg-white rounded-[12px] border border-gray-200 p-6 sm:p-8 shadow-sm">
-               <h3 className="text-[20px] font-extrabold text-[#222] mb-6 flex items-center gap-2">
-                 {translate('customer_reviews')} <span className="text-gray-400 font-medium text-[15px]">({reviews.length})</span>
+            <div className="bg-white rounded-2xl border border-gray-100 p-5 sm:p-7 shadow-sm">
+               <h3 className="text-[18px] font-bold text-[#222] mb-5">
+                 {translate('customer_reviews')} ({reviews.length})
                </h3>
 
                {/* Форма для добавления отзыва */}
-               {user ? (
-                 <div className="bg-gray-50 border border-gray-200 rounded-[8px] p-5 mb-8">
-                   <p className="font-bold text-[14px] mb-3 text-gray-700">{translate('rate_seller')}</p>
-                   <div className="flex gap-1 mb-4">
-                     {[1, 2, 3, 4, 5].map(star => (
-                       <button 
-                         key={star} 
-                         onClick={() => setNewRating(star)}
-                         className={`text-2xl transition-all hover:scale-110 ${star <= newRating ? 'text-yellow-400' : 'text-gray-300'}`}
-                       >
-                         ★
-                       </button>
-                     ))}
-                   </div>
-                   <textarea 
-                     className="w-full border border-gray-300 rounded-[6px] p-3 text-[14px] outline-none focus:border-[#11a95e] resize-none mb-3"
-                     rows={3}
-                     placeholder={translate('review_placeholder')}
-                     value={newComment}
-                     onChange={(e) => setNewComment(e.target.value)}
-                   />
-                   <button 
-                     onClick={submitReview} 
-                     disabled={isSubmitting}
-                     className="bg-[#11a95e] hover:bg-[#0e9552] text-white px-6 py-2.5 rounded-[6px] font-bold text-[13px] transition-colors disabled:bg-gray-400"
-                   >
-                     {isSubmitting ? translate('submitting') : translate('publish_review')}
-                   </button>
-                 </div>
-               ) : (
-                 <div className="bg-blue-50 border border-blue-100 rounded-[8px] p-4 mb-8 text-[13px] text-blue-700 font-medium flex items-center gap-2">
-                   <span>ℹ️</span> {translate('login_to_review')}
+               {user && (
+                 <div className="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-100">
+                    <p className="font-bold text-[13px] mb-2 text-gray-700">{translate('rate_seller')}</p>
+                    <div className="flex gap-1 mb-3">
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <button 
+                          key={star} 
+                          onClick={() => setNewRating(star)}
+                          className={`text-xl transition-all hover:scale-110 ${star <= newRating ? 'text-yellow-400' : 'text-gray-300'}`}
+                        >
+                          ★
+                        </button>
+                      ))}
+                    </div>
+                    <textarea 
+                      className="w-full border border-gray-200 rounded-lg p-3 text-[13px] outline-none focus:border-[#11a95e] mb-3 resize-none bg-white"
+                      rows={2}
+                      placeholder={translate('review_placeholder')}
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                    />
+                    <button 
+                      onClick={submitReview} 
+                      disabled={isSubmitting}
+                      className="bg-[#11a95e] hover:bg-[#0e9552] text-white px-5 py-2 rounded-lg font-bold text-[12px] transition-colors disabled:bg-gray-400"
+                    >
+                      {isSubmitting ? translate('submitting') : translate('publish_review')}
+                    </button>
                  </div>
                )}
 
                {/* Список отзывов */}
-               <div className="space-y-6">
-                 {reviews.length === 0 ? (
-                   <p className="text-[14px] text-gray-500 italic">{translate('no_reviews_yet')}</p>
-                 ) : (
-                   reviews.map(review => (
-                     <div key={review.id} className="border-b border-gray-100 pb-6 last:border-0 last:pb-0">
+               <div className="space-y-5">
+                  {reviews.length === 0 ? (
+                    <p className="text-[13px] text-gray-500 italic">{translate('no_reviews_yet')}</p>
+                  ) : (
+                    reviews.map(r => (
+                      <div key={r.id} className="border-b border-gray-50 pb-5 last:border-0 last:pb-0">
                         <div className="flex items-center gap-3 mb-2">
-                           <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center font-bold text-emerald-600 border border-emerald-200">
-                             {review.client_email.charAt(0).toUpperCase()}
-                           </div>
-                           <div>
-                             <p className="font-bold text-[14px] text-gray-800">{review.client_email.split('@')[0]}</p>
-                             <div className="flex items-center gap-2">
-                               <p className="text-[12px] text-yellow-500 tracking-widest">
-                                 {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
-                               </p>
-                               <span className="text-[11px] text-gray-400">
-                                 {new Date(review.created_at).toLocaleDateString('ru-RU')}
-                               </span>
-                             </div>
-                           </div>
+                          <div className="w-8 h-8 bg-emerald-50 text-[#11a95e] border border-emerald-100 rounded-full flex items-center justify-center text-[12px] font-bold">
+                            {r.client_email[0].toUpperCase()}
+                          </div>
+                          <span className="text-[13px] font-bold text-gray-800">{r.client_email.split('@')[0]}</span>
+                          <span className="text-yellow-400 text-[12px] tracking-widest">
+                            {'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}
+                          </span>
                         </div>
-                        <p className="text-[14px] text-gray-700 leading-relaxed pl-13">{review.comment}</p>
-                     </div>
-                   ))
-                 )}
+                        <p className="text-[13px] text-gray-600 pl-11">{r.comment}</p>
+                      </div>
+                    ))
+                  )}
                </div>
             </div>
           </div>
 
-          {/* ПРАВАЯ КОЛОНКА (Сайдбар с ценой и профилем) */}
-          <aside className="w-full lg:w-[380px] shrink-0 space-y-6 lg:sticky lg:top-[100px]">
+          {/* ПРАВАЯ КОЛОНКА: Sidebar (Sticky) */}
+          <aside className="w-full lg:w-[350px] shrink-0 space-y-5 lg:sticky lg:top-[80px]">
             
             {/* Блок цены */}
-            <div className="bg-white rounded-[12px] border border-gray-200 p-6 shadow-lg border-t-4 border-t-[#11a95e]">
-              <div className="flex justify-between items-center mb-6">
-                 <h2 className="text-[28px] font-black text-[#11a95e]">{displayPrice(service.price)}</h2>
-                 <span className="text-[13px] text-gray-500 font-medium line-through">
-                   {displayPrice(Math.round(service.price * 1.2))}
-                 </span>
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-md border-t-4 border-t-[#11a95e]">
+              <div className="flex justify-between items-end mb-5">
+                  <div className="text-[26px] font-black text-[#222]">{displayPrice(service.price)}</div>
+                  <div className="text-[12px] text-gray-400 line-through mb-1">{displayPrice(Math.round(service.price * 1.3))}</div>
               </div>
               
-              <ul className="space-y-3 mb-8 text-[14px] text-gray-600">
-                <li className="flex items-center gap-3"><span className="text-[#11a95e]">✔</span> {translate('quality_guarantee')}</li>
-                <li className="flex items-center gap-3"><span className="text-[#11a95e]">✔</span> {translate('direct_communication')}</li>
-                <li className="flex items-center gap-3"><span className="text-[#11a95e]">✔</span> {translate('post_support')}</li>
-              </ul>
+              <div className="space-y-3 mb-6 text-[13px] text-gray-500 font-medium">
+                <div className="flex items-center gap-2">✅ <span className="flex-1">{translate('quality_guarantee')}</span></div>
+                <div className="flex items-center gap-2">✅ <span className="flex-1">{translate('direct_communication')}</span></div>
+                <div className="flex items-center gap-2">✅ <span className="flex-1">{translate('post_support')}</span></div>
+              </div>
 
-              <button onClick={handleOrder} className="w-full bg-[#11a95e] hover:bg-[#0e9552] text-white py-4 rounded-[8px] font-extrabold text-[15px] transition-all shadow-md shadow-[#11a95e]/30 flex items-center justify-center gap-2">
+              <button 
+                onClick={handleOrder} 
+                className="w-full bg-[#11a95e] hover:bg-[#0e9552] text-white py-4 rounded-xl font-black text-[14px] transition-all shadow-lg shadow-emerald-100"
+              >
                 {translate('order_for')} {displayPrice(service.price)}
               </button>
-              <p className="text-center text-[12px] text-gray-400 mt-4">{translate('safe_deal')}</p>
+              <div className="mt-3 text-center text-[11px] text-gray-400">{translate('safe_deal')}</div>
             </div>
 
             {/* Карточка продавца */}
-            <div className="bg-white rounded-[12px] border border-gray-200 p-6 shadow-sm flex flex-col items-center text-center">
-               <div className="w-[100px] h-[100px] rounded-full bg-gray-100 overflow-hidden border-4 border-white shadow-md mb-4 flex items-center justify-center text-gray-400 font-bold text-4xl">
-                  {service.seller_avatar ? <img src={service.seller_avatar} className="w-full h-full object-cover" alt="" /> : (service.seller_name ? service.seller_name.charAt(0).toUpperCase() : 'U')}
+            <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+               <div className="flex items-center gap-4 mb-4">
+                 <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 font-bold text-xl overflow-hidden border-2 border-white shadow-sm">
+                   {service.seller_avatar ? (
+                     <img src={service.seller_avatar} className="w-full h-full object-cover" alt="" />
+                   ) : (
+                     service.seller_name ? service.seller_name.charAt(0).toUpperCase() : 'U'
+                   )}
+                 </div>
+                 <div>
+                   <div className="font-bold text-[15px] flex items-center gap-1.5">
+                     {service.seller_name || 'UNIT Seller'}
+                     <span className="bg-blue-50 text-blue-600 text-[9px] px-1.5 py-0.5 rounded font-black border border-blue-100 uppercase">PRO</span>
+                   </div>
+                   <div className="text-[12px] text-yellow-500 font-medium mt-0.5">
+                     ★ {service.rating || '5.0'} <span className="text-gray-400 ml-1">({service.reviews_count || 0} {translate('reviews_count_text')})</span>
+                   </div>
+                 </div>
                </div>
-               
-               <h4 className="font-extrabold text-[18px] text-[#222] flex items-center gap-2 justify-center">
-                 {service.seller_name || 'UNIT_USER'} 
-                 <span className="bg-blue-50 text-blue-600 text-[10px] px-2 py-0.5 rounded font-black border border-blue-100 uppercase">PRO</span>
-               </h4>
-               
-               <p className="text-[13px] text-gray-500 mt-1 mb-6 flex items-center gap-1 justify-center">
-                 <span className="text-yellow-400 text-[16px]">★</span> 
-                 <strong className="text-gray-800">{service.rating ?? '5.0'}</strong> 
-                 ({service.reviews_count ?? 0} {translate('reviews_count_text')})
-               </p>
-
-               <div className="grid grid-cols-2 gap-4 w-full border-t border-gray-100 pt-6">
-                 <div>
-                    <p className="text-[20px] font-black text-[#222]">{service.seller_projects ?? 0}</p>
-                    <p className="text-[12px] text-gray-500 font-medium">{translate('created_services')}</p>
-                 </div>
-                 <div>
-                    <p className="text-[20px] font-black text-[#11a95e]">{service.seller_hired ?? 100}%</p>
-                    <p className="text-[12px] text-gray-500 font-medium">{translate('successfully_delivered')}</p>
-                 </div>
+               <div className="grid grid-cols-2 gap-2 border-t border-gray-50 pt-4">
+                  <div className="text-center">
+                    <div className="font-bold text-[15px] text-[#222]">{service.seller_projects || 0}</div>
+                    <div className="text-[10px] text-gray-400 uppercase font-bold mt-0.5">{translate('created_services')}</div>
+                  </div>
+                  <div className="text-center border-l border-gray-50">
+                    <div className="font-bold text-[15px] text-[#11a95e]">{service.seller_hired || 100}%</div>
+                    <div className="text-[10px] text-gray-400 uppercase font-bold mt-0.5">{translate('successfully_delivered')}</div>
+                  </div>
                </div>
             </div>
           </aside>
