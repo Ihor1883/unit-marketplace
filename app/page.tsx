@@ -415,7 +415,7 @@ export default function HomePage() {
             )}
           </aside>
 
-          <section className="flex-1 space-y-4 w-full overflow-hidden">
+          <section className="flex-1 space-y-5 w-full pt-4">
             {loading ? (
               <div className="p-10 text-center animate-pulse text-gray-400 font-medium">Loading...</div>
             ) : sortedServices.length === 0 ? (
