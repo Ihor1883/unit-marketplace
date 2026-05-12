@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { supabase } from '../../supabase'; // Убедись, что путь к supabase.ts правильный
+import { supabase } from '../supabase'; // Убедись, что путь к supabase.ts правильный
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
