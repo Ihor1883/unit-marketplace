@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, Fragment } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../supabase';
+import Chat from '../components/Chat'; // Убедись, что путь к файлу Chat правильный
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -15,6 +16,9 @@ export default function AdminDashboard() {
   const [allOrders, setAllOrders] = useState<any[]>([]);
   const [allServices, setAllServices] = useState<any[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+
+  // СОСТОЯНИЕ ДЛЯ ОТКРЫТОГО ЧАТА (Аккордеон)
+  const [openChatId, setOpenChatId] = useState<string | null>(null);
 
   // --- ИНИЦИАЛИЗАЦИЯ ---
   useEffect(() => {
@@ -102,6 +106,15 @@ export default function AdminDashboard() {
     }
   };
 
+  // Функция для переключения чата
+  const toggleChat = (orderId: string) => {
+    if (openChatId === orderId) {
+      setOpenChatId(null); // Если кликнули по открытому - закрываем
+    } else {
+      setOpenChatId(orderId); // Открываем новый
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F3F4F6] font-sans text-[#333]">
       
@@ -175,33 +188,60 @@ export default function AdminDashboard() {
                   <tr><td colSpan={5} className="p-8 text-center text-gray-400 font-medium">Заказов пока нет</td></tr>
                 ) : (
                   allOrders.map(order => (
-                    <tr key={order.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="p-4 pl-6">
-                        <div className="font-mono text-[11px] text-gray-400 mb-1">{order.id.split('-')[0]}</div>
-                        <div className="text-gray-500">{new Date(order.created_at).toLocaleDateString('ru-RU')}</div>
-                      </td>
-                      <td className="p-4">
-                        <div className="font-bold text-[#222]">{order.services?.title || <span className="text-red-400">Удалена</span>}</div>
-                        <div className="text-[11px] text-gray-400">{order.services?.seller_email || '-'}</div>
-                      </td>
-                      <td className="p-4 text-gray-600">{order.client_email}</td>
-                      <td className="p-4 text-center">
-                        <span className={`px-2.5 py-1 rounded-[6px] text-[10px] font-extrabold uppercase tracking-widest ${getStatusStyle(order.status)}`}>
-                          {order.status}
-                        </span>
-                      </td>
-                      <td className="p-4 pr-6 text-right">
-                        <select 
-                          value={order.status}
-                          onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                          className="bg-white border border-gray-300 text-gray-700 text-[12px] font-bold rounded-[6px] px-2 py-1.5 outline-none focus:border-[#11a95e]"
-                        >
-                          <option value="New">New</option>
-                          <option value="Process">Process</option>
-                          <option value="Done">Done</option>
-                        </select>
-                      </td>
-                    </tr>
+                    <Fragment key={order.id}>
+                      <tr className="hover:bg-gray-50/50 transition-colors">
+                        <td className="p-4 pl-6">
+                          <div className="font-mono text-[11px] text-gray-400 mb-1">{order.id.split('-')[0]}</div>
+                          <div className="text-gray-500">{new Date(order.created_at).toLocaleDateString('ru-RU')}</div>
+                        </td>
+                        <td className="p-4">
+                          <div className="font-bold text-[#222]">{order.services?.title || <span className="text-red-400">Удалена</span>}</div>
+                          <div className="text-[11px] text-gray-400">{order.services?.seller_email || '-'}</div>
+                        </td>
+                        <td className="p-4 text-gray-600">{order.client_email}</td>
+                        <td className="p-4 text-center">
+                          <span className={`px-2.5 py-1 rounded-[6px] text-[10px] font-extrabold uppercase tracking-widest ${getStatusStyle(order.status)}`}>
+                            {order.status}
+                          </span>
+                        </td>
+                        <td className="p-4 pr-6 text-right">
+                          <div className="flex justify-end items-center gap-3">
+                            {/* КНОПКА ЧАТА */}
+                            <button 
+                              onClick={() => toggleChat(order.id)}
+                              className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-[12px] font-bold rounded-[6px] px-3 py-1.5 transition-colors flex items-center gap-1"
+                            >
+                              Чат {openChatId === order.id ? '▲' : '▼'}
+                            </button>
+
+                            {/* ВЫБОР СТАТУСА */}
+                            <select 
+                              value={order.status}
+                              onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                              className="bg-white border border-gray-300 text-gray-700 text-[12px] font-bold rounded-[6px] px-2 py-1.5 outline-none focus:border-[#11a95e] w-[100px]"
+                            >
+                              <option value="New">New</option>
+                              <option value="Process">Process</option>
+                              <option value="Done">Done</option>
+                            </select>
+                          </div>
+                        </td>
+                      </tr>
+                      
+                      {/* ВЫПАДАЮЩИЙ БЛОК ЧАТА (АККОРДЕОН) */}
+                      {openChatId === order.id && (
+                        <tr>
+                          <td colSpan={5} className="p-0 border-b border-gray-200 bg-gray-50/80">
+                            <div className="p-6">
+                              <div className="bg-white border border-gray-200 rounded-[12px] overflow-hidden shadow-sm">
+                                {/* Вызываем твой компонент чата */}
+                                <Chat orderId={order.id} userEmail="Admin" lang="RU" />
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
                   ))
                 )}
               </tbody>
