@@ -90,7 +90,7 @@ export default function AddServicePage() {
     return data.publicUrl;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !price || !description) {
       toast.error(translate('fill_req'));
@@ -100,12 +100,17 @@ export default function AddServicePage() {
     setIsUploading(true);
 
     try {
+      // Получаем язык из памяти или стейта
+      const activeLang = localStorage.getItem('unit_lang') || lang || 'EN';
+
+      // ⚠️ КРИТИЧЕСКИЙ ТЕСТ: Прямо на экране появится окно с текущим значением
+      alert("ДИАГНОСТИКА! Сайт отправляет в базу язык: " + activeLang);
+
       let finalImageUrl = '';
       if (selectedFile) {
         finalImageUrl = await uploadImage(selectedFile);
       }
 
-      // Получаем профиль продавца, чтобы записать его имя
       const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single();
       const sellerName = profile?.full_name || user.email.split('@')[0];
 
@@ -118,14 +123,15 @@ export default function AddServicePage() {
           image_url: finalImageUrl,
           seller_email: user.email,
           seller_name: sellerName,
-          user_id: user.id
+          user_id: user.id,
+          language: activeLang // Отправляем язык
         }
       ]);
 
       if (error) throw error;
 
       toast.success(translate('success'));
-      router.push('/profile'); // После успеха кидаем обратно в кабинет
+      router.push('/profile'); 
 
     } catch (err: any) {
       toast.error(translate('err_save') + err.message);
