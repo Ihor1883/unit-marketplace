@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { supabase } from '../../../supabase'; // Убедитесь, что путь верный
+// ИСПРАВЛЕННЫЙ ПУТЬ К БАЗЕ ДАННЫХ:
+import { supabase } from '../../supabase'; 
 
 export default function FreelancerProfile() {
   const params = useParams();
