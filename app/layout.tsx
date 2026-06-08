@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
-import { Toaster } from 'react-hot-toast'; // <-- ЭТОТ ИМПОРТ ОЧЕНЬ ВАЖЕН
-import './globals.css'; 
+import { Toaster } from 'react-hot-toast'; 
+import './globals.css';
+import AIChatWidget from './components/AIChatWidget';
 
 export const metadata: Metadata = {
   title: 'UNIT Marketplace — Цифровые Услуги',
@@ -39,6 +40,9 @@ export default function RootLayout({
       <body className="bg-[#F3F4F6] text-[#333] antialiased">
         {children}
         
+        {/* НАШ БЕСПЛАТНЫЙ УМНЫЙ AI-ПОМОЩНИК */}
+        <AIChatWidget />
+
         {/* А ЭТОТ КОМПОНЕНТ ОТВЕЧАЕТ ЗА ВЫВОД ПЛАШЕК НА ЭКРАН */}
         <Toaster position="bottom-right" reverseOrder={false} />
       </body>

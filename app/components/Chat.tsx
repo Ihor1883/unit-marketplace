@@ -1,153 +1,252 @@
 "use client";
 
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../supabase';
+import { checkMessage, censorText } from '../utils/moderation'; 
 
-export default function Chat({ orderId, userEmail, lang }: { orderId: string, userEmail: string, lang: string }) {
+interface ChatProps {
+  orderId: string;
+  userEmail: string;
+  lang: string;
+  status?: string; // Добавили статус заказа
+}
+
+export default function Chat({ orderId, userEmail, lang, status }: ChatProps) {
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [isSending, setIsSending] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const t: any = {
-    RU: { placeholder: "Напишите сообщение...", send: "Отправить", live: "ЧАТ ПО ЗАКАЗУ" },
-    EN: { placeholder: "Type a message...", send: "Send", live: "LIVE CHAT" },
-    PL: { placeholder: "Napisz wiadomość...", send: "Wyślij", live: "CZAT NA ŻYWO" },
-    DE: { placeholder: "Schreiben...", send: "Senden", live: "LIVE-CHAT" },
-    ES: { placeholder: "Escribir...", send: "Enviar", live: "CHAT EN VIVO" },
-    IT: { placeholder: "Scrivere...", send: "Invia", live: "CHAT DAL VIVO" },
-    FR: { placeholder: "Écrire...", send: "Envoyer", live: "CHAT EN DIRECT" }
+  const t: Record<string, any> = {
+    RU: { 
+      placeholder: "Напишите сообщение...", send: "ОТПРАВИТЬ", loading: "Загрузка сообщений...", no_messages: "История сообщений пуста. Начните диалог!",
+      safety_alert: "Осторожно, мошенники!", safety_text: "Мы не проводим платежи внутри сайта. Не переходите по фишинговым ссылкам и не переводите 100% предоплату.", safety_link: "Правила безопасности →"
+    },
+    EN: { 
+      placeholder: "Type a message...", send: "SEND", loading: "Loading messages...", no_messages: "No messages yet. Start the conversation!",
+      safety_alert: "Beware of scammers!", safety_text: "We do not process payments on the site. Do not click on phishing links or send 100% upfront payments.", safety_link: "Safety rules →"
+    },
+    PL: { 
+      placeholder: "Napisz wiadomość...", send: "WYŚLIJ", loading: "Ładowanie...", no_messages: "Brak wiadomości. Rozpocznij rozmowę!",
+      safety_alert: "Uwaga na oszustów!", safety_text: "Nie przetwarzamy płatności na stronie. Nie klikaj w podejrzane linki i nie wysyłaj 100% zaliczki.", safety_link: "Zasady bezpieczeństwa →"
+    },
+    DE: {
+      placeholder: "Nachricht eingeben...", send: "SENDEN", loading: "Laden...", no_messages: "Noch keine Nachrichten. Beginnen Sie das Gespräch!",
+      safety_alert: "Achtung Betrüger!", safety_text: "Wir wickeln keine Zahlungen über die Seite ab. Klicken Sie nicht auf Phishing-Links und zahlen Sie nicht 100% im Voraus.", safety_link: "Sicherheitsregeln →"
+    },
+    ES: {
+      placeholder: "Escribe un mensaje...", send: "ENVIAR", loading: "Cargando...", no_messages: "Aún no hay mensajes. ¡Inicia la conversación!",
+      safety_alert: "¡Cuidado con las estafas!", safety_text: "No procesamos pagos en el sitio. No hagas clic en enlaces sospechosos ni envíes pagos por adelantado del 100%.", safety_link: "Reglas de seguridad →"
+    },
+    IT: {
+      placeholder: "Scrivi un messaggio...", send: "INVIA", loading: "Caricamento...", no_messages: "Nessun messaggio. Inizia la conversazione!",
+      safety_alert: "Attenzione alle truffe!", safety_text: "Non gestiamo pagamenti sul sito. Non cliccare su link di phishing e non inviare pagamenti anticipati del 100%.", safety_link: "Regole di sicurezza →"
+    },
+    FR: {
+      placeholder: "Écrivez un message...", send: "ENVOYER", loading: "Chargement...", no_messages: "Aucun message. Commencez la conversation !",
+      safety_alert: "Attention aux arnaques !", safety_text: "Nous ne traitons pas les paiements sur le site. Ne cliquez pas sur des liens suspects et n'envoyez pas 100% d'acompte.", safety_link: "Règles de sécurité →"
+    }
   };
-  
-  const translate = (key: string) => t[lang]?.[key] || t['EN'][key];
+
+  const translate = (key: string) => (t[lang] && t[lang][key]) ? t[lang][key] : t['EN'][key] || key;
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchMessages = async () => {
-      const { data } = await supabase
-        .from('messages')
-        .select('*')
-        .eq('order_id', orderId)
-        .order('created_at', { ascending: true });
-      if (data) setMessages(data);
-      setLoading(false);
+      try {
+        const { data, error } = await supabase
+          .from('messages')
+          .select('*')
+          .eq('order_id', orderId)
+          .order('created_at', { ascending: true });
+
+        if (!error && data && isMounted) {
+          setMessages(data);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
     };
+
     fetchMessages();
 
     const channel = supabase
-      .channel(`chat-${orderId}`)
-      .on('postgres_changes', { 
-        event: 'INSERT', 
-        schema: 'public', 
-        table: 'messages', 
-        filter: `order_id=eq.${orderId}` 
-      }, 
-      (payload) => {
-        setMessages((prev) => [...prev, payload.new]);
-      })
+      .channel(`order_chat_${orderId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages', filter: `order_id=eq.${orderId}` },
+        (payload) => {
+          if (isMounted) {
+            setMessages((prev) => {
+              if (prev.some((m) => m.id === payload.new.id)) return prev;
+              return [...prev, payload.new];
+            });
+          }
+        }
+      )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      isMounted = false;
+      supabase.removeChannel(channel);
+    };
   }, [orderId]);
 
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+    scrollToBottom();
   }, [messages]);
 
-  const sendMessage = async () => {
-    if (!newMessage.trim()) return;
-    const msg = newMessage;
-    setNewMessage('');
-    
-    const { error } = await supabase.from('messages').insert([
-      { order_id: orderId, sender_email: userEmail, text: msg }
-    ]);
-    
-    if (error) {
-        setNewMessage(msg); // Возвращаем текст в поле при ошибке
-        return;
-    }
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim() || isSending) return;
+
+    setIsSending(true);
+    const originalText = newMessage.trim();
 
     try {
-      await fetch('/api/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'CHAT_MESSAGE',
-          orderId: orderId,
-          sender: userEmail,
-          text: msg
-        })
-      });
-    } catch (e) {}
+      // 1. ПРОВЕРКА НА БАН
+      const { data: profile } = await supabase.from('profiles').select('is_banned').eq('email', userEmail).single();
+      if (profile?.is_banned) {
+        alert("Ваш аккаунт заблокирован за нарушение правил. Отправка сообщений недоступна.");
+        setIsSending(false);
+        return;
+      }
+
+      // 2. ФИЛЬТРАЦИЯ ТЕКСТА
+      const moderation = checkMessage(originalText);
+      const textToSend = moderation.isClean ? originalText : censorText(originalText);
+
+      // 3. ОТПРАВКА ЖАЛОБЫ АДМИНУ (если текст грязный)
+      if (!moderation.isClean) {
+        await supabase.from('violations').insert([{
+          user_email: userEmail,
+          message: originalText,
+          reason: moderation.reason
+        }]);
+      }
+
+      setNewMessage('');
+
+      // 4. ОТПРАВКА СООБЩЕНИЯ В БАЗУ
+      const { error } = await supabase
+        .from('messages')
+        .insert([{ order_id: orderId, sender_email: userEmail, text: textToSend }]);
+
+      if (error) {
+        console.error(error.message);
+        setNewMessage(originalText);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSending(false);
+    }
   };
 
+  const formatTime = (dateStr: string) => {
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+      return '';
+    }
+  };
+
+  const isOrderCompleted = status === 'Completed';
+
   return (
-    <div className="flex flex-col h-[420px] bg-white border border-gray-200 rounded-[16px] overflow-hidden mt-6 shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="flex flex-col h-[450px] bg-white rounded-2xl overflow-hidden border border-gray-100">
       
-      {/* Шапка чата */}
-      <div className="bg-gray-50 px-5 py-3 border-b border-gray-100 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
-            <span className="text-[10px] font-black text-gray-500 uppercase tracking-[2px]">{translate('live')}</span>
+      {/* === ПРЕДУПРЕЖДАЮЩИЙ БАННЕР О БЕЗОПАСНОСТИ === */}
+      <div className="bg-orange-50 border-b border-orange-100 p-3 sm:p-4 shrink-0 flex items-start gap-3">
+        <div className="text-[16px] md:text-[20px] mt-0.5 animate-bounce">⚠️</div>
+        <div>
+          <p className="text-[11px] sm:text-[12px] text-orange-800 font-medium leading-relaxed">
+            <span className="font-black">{translate('safety_alert')}</span> {translate('safety_text')}
+            <a href="/safety" target="_blank" className="font-bold text-orange-600 hover:text-orange-700 underline ml-1 transition-colors">
+              {translate('safety_link')}
+            </a>
+          </p>
         </div>
-        <span className="text-[10px] text-gray-400 font-medium">#{orderId.slice(0, 8)}</span>
       </div>
 
-      {/* Область сообщений */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-[#FAFAFA]">
+      {/* КОРПУС СООБЩЕНИЙ */}
+      <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-[#F8F9FA] min-h-0 select-text">
         {loading ? (
-            <div className="h-full flex items-center justify-center text-gray-300 text-sm italic"> UNIT CHAT... </div>
+          <div className="h-full flex items-center justify-center text-[13px] text-gray-400 font-medium animate-pulse">
+            {translate('loading')}
+          </div>
         ) : messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-gray-400 space-y-2 opacity-50">
-                <span className="text-3xl">💬</span>
-                <p className="text-[12px] font-medium">Нет сообщений. Начните диалог!</p>
-            </div>
+          <div className="h-full flex items-center justify-center text-center p-6">
+            <p className="text-[13px] text-gray-400 font-medium italic max-w-xs">{translate('no_messages')}</p>
+          </div>
         ) : (
-            messages.map((m, i) => {
-              const isMe = m.sender_email === userEmail;
-              return (
-                <div key={i} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[85%] px-4 py-2.5 rounded-[18px] text-[14px] shadow-sm relative group ${
-                    isMe 
-                      ? 'bg-[#11a95e] text-white rounded-br-none' 
-                      : 'bg-white border border-gray-100 text-[#333] rounded-bl-none'
+          messages.map((msg) => {
+            const isMe = msg.sender_email?.toLowerCase() === userEmail?.toLowerCase();
+            return (
+              <div key={msg.id} className={`flex flex-col max-w-[75%] ${isMe ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
+                
+                {/* ИМЯ СВЕРХУ ОБЛАЧКА */}
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 px-1.5">
+                  {msg.sender_email?.split('@')[0]}
+                </span>
+                
+                {/* ОВАЛЬНОЕ ОБЛАЧКО С ХВОСТИКОМ */}
+                <div className={`px-5 py-3 text-[14px] font-medium shadow-sm break-words relative transition-all ${
+                  isMe 
+                    ? 'bg-gradient-to-br from-[#11a95e] to-emerald-500 text-white rounded-[22px] rounded-tr-none' 
+                    : 'bg-white text-gray-800 border border-gray-100 rounded-[22px] rounded-tl-none'
+                }`}>
+                  <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+                  
+                  {/* ВРЕМЯ ВНУТРИ ОБЛАЧКА */}
+                  <span className={`block text-[9px] font-bold text-right mt-1.5 -mb-0.5 ${
+                    isMe ? 'text-emerald-100' : 'text-gray-400'
                   }`}>
-                    <div className="flex justify-between items-baseline gap-4 mb-0.5">
-                        <p className={`font-black text-[9px] uppercase tracking-wider ${isMe ? 'text-white/70' : 'text-[#11a95e]'}`}>
-                            {isMe ? 'Вы' : m.sender_email.split('@')[0]}
-                        </p>
-                        <span className={`text-[8px] opacity-50 ${isMe ? 'text-white' : 'text-gray-400'}`}>
-                            {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                    </div>
-                    <p className="leading-snug font-medium">{m.text}</p>
-                  </div>
+                    {formatTime(msg.created_at)}
+                  </span>
                 </div>
-              )
-            })
+              </div>
+            );
+          })
         )}
-        <div ref={scrollRef} />
+        <div ref={messagesEndRef} />
       </div>
 
-      {/* Поле ввода */}
-      <div className="p-4 bg-white border-t border-gray-100">
-        <div className="flex gap-2 bg-gray-50 rounded-[12px] p-1.5 border border-gray-100 focus-within:border-[#11a95e] focus-within:ring-4 focus-within:ring-[#11a95e]/5 transition-all">
-            <input 
-              className="flex-1 bg-transparent px-3 py-2 text-[14px] outline-none placeholder:text-gray-400 font-medium"
-              placeholder={translate('placeholder')}
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            />
-            <button 
-              onClick={sendMessage} 
-              className="bg-[#11a95e] text-white px-5 py-2 rounded-[10px] font-black text-[11px] uppercase tracking-wider hover:bg-[#0e9552] transition-all active:scale-95 shadow-md shadow-emerald-100 disabled:opacity-50"
-              disabled={!newMessage.trim()}
-            >
-              {translate('send')}
-            </button>
+      {/* ФОРМА ОТПРАВКИ ИЛИ ПЛАШКА "ЗАВЕРШЕНО" */}
+      {isOrderCompleted ? (
+        <div className="p-4 bg-emerald-50 border-t border-emerald-100 flex flex-col items-center justify-center text-center">
+          <span className="text-[13px] font-black text-[#11a95e] uppercase tracking-wider mb-1">✓ Заказ завершен</span>
+          <span className="text-[12px] text-emerald-700 font-medium">Чат доступен только для чтения</span>
         </div>
-      </div>
+      ) : (
+        <form onSubmit={handleSendMessage} className="p-3 bg-white border-t border-gray-100 flex items-center gap-2">
+          <input 
+            type="text" 
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            placeholder={translate('placeholder')}
+            disabled={loading || isSending}
+            className="flex-1 h-[44px] bg-gray-50 border border-gray-200 rounded-xl px-4 text-[14px] font-medium outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-500/10 focus:bg-white transition-all"
+          />
+          <button 
+            type="submit" 
+            disabled={!newMessage.trim() || isSending || loading}
+            className="h-[44px] bg-gradient-to-r from-gray-200 to-gray-300 hover:from-gray-300 hover:to-gray-400 text-gray-600 font-black text-[12px] uppercase tracking-wider px-6 rounded-xl transition-all disabled:opacity-40 shrink-0 [&:not(:disabled)]:bg-gradient-to-r [&:not(:disabled)]:from-orange-400 [&:not(:disabled)]:to-orange-500 [&:not(:disabled)]:text-white [&:not(:disabled)]:shadow-md [&:not(:disabled)]:shadow-orange-500/10"
+          >
+            {isSending ? "..." : translate('send')}
+          </button>
+        </form>
+      )}
+
     </div>
   );
 }

@@ -1,135 +1,160 @@
 "use client";
 
-import Link from 'next/link';
+import React from 'react';
+import { useRouter } from 'next/navigation';
+
+interface ServiceCardProps {
+  service: any;
+  isAdmin?: boolean;
+  displayPrice: (price: number) => string;
+  translate: (key: string) => string;
+  handleOrder?: () => void;
+  deleteService?: (id: string) => void;
+  isFavorite?: boolean;
+  toggleFavorite?: () => void;
+  isTop?: boolean;
+  viewMode?: 'grid' | 'list';
+  isOnline?: boolean;
+}
 
 export default function ServiceCard({
   service,
-  isAdmin,
+  isAdmin = false,
   displayPrice,
   translate,
   handleOrder,
   deleteService,
-  isFavorite,
+  isFavorite = false,
   toggleFavorite,
-  isTop // <-- ДОБАВИЛИ ПРОП ИЗ ГЛАВНОЙ СТРАНИЦЫ
-}: any) {
-  
-  // Вычисляем уровень продавца на основе количества отзывов
-  const reviewsCount = service.reviews_count || 0;
-  const getSellerLevel = (count: number) => {
-    if (count >= 50) return { icon: '💎', text: 'Платина', style: 'bg-gradient-to-r from-violet-100 to-indigo-100 text-indigo-800 border-indigo-200' };
-    if (count >= 20) return { icon: '🥇', text: 'Золото', style: 'bg-gradient-to-r from-yellow-50 to-amber-100 text-amber-800 border-amber-200' };
-    if (count >= 5) return  { icon: '🥈', text: 'Серебро', style: 'bg-gradient-to-r from-slate-100 to-gray-200 text-gray-800 border-gray-300' };
-    return { icon: '🌱', text: 'Новичок', style: 'bg-gray-50 text-gray-600 border-gray-200' };
+  isTop = false,
+  viewMode = 'grid',
+  isOnline = false
+}: ServiceCardProps) {
+  const router = useRouter();
+
+  if (!service) return null;
+
+  // Логика отображения имени продавца
+  const sellerName = service.seller_name === "Новый пользователь" 
+    ? translate('unit_seller') 
+    : (service.seller_name || translate('unit_seller'));
+
+  const navigateToDetails = () => {
+    router.push(`/service/${service.id}`);
   };
 
-  const level = getSellerLevel(reviewsCount);
-  const ratingAvg = service.rating_avg ? Number(service.rating_avg).toFixed(1) : '5.0';
+  const handleButtonClick = (e: React.MouseEvent, action?: () => void) => {
+    e.stopPropagation();
+    if (action) action();
+  };
+
+  const isListView = viewMode === 'list';
 
   return (
-    <div className={`bg-white rounded-[8px] border p-5 shadow-sm hover:shadow-lg transition-all duration-300 relative group ${
-      isTop ? 'border-yellow-400/60 hover:border-yellow-500' : 'border-gray-200 hover:border-[#11a95e]/40'
-    }`}>
-      
-      {/* ПЛАШКА "ТОП" В ЛЕВОМ ВЕРХНЕМ УГЛУ */}
-      {isTop && (
-        <div className="absolute -top-3 -left-3 bg-gradient-to-r from-amber-400 to-yellow-500 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-md border border-yellow-300 transform -rotate-2 z-10 flex items-center gap-1">
-          🔥 ТОП
-        </div>
-      )}
+    <div 
+      onClick={navigateToDetails}
+      className={`bg-white transition-all duration-300 group cursor-pointer flex ${
+        isTop 
+          ? 'border-2 border-amber-500 shadow-lg shadow-amber-500/15 bg-gradient-to-br from-amber-50/50 via-white to-transparent' 
+          : 'border border-gray-100 shadow-sm'
+      } ${
+        isListView 
+          ? 'flex-col sm:flex-row p-5 gap-6 rounded-2xl hover:shadow-xl items-center hover:-translate-y-1.5' 
+          : 'flex-col rounded-2xl hover:-translate-y-1.5 hover:shadow-xl'
+      }`}
+    >
+      {/* Картинка */}
+      <div className={`bg-gray-50 relative overflow-hidden shrink-0 ${
+        isListView 
+          ? 'w-full sm:w-[220px] aspect-[4/3] rounded-2xl border border-gray-100' 
+          : 'w-full aspect-[4/3] rounded-t-xl border-b border-gray-50'
+      }`}>
+        {service.image_url ? (
+          <img src={service.image_url} alt={service.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-300 text-3xl bg-gradient-to-br from-gray-50 to-gray-100 group-hover:scale-110 transition-transform duration-500">📷</div>
+        )}
 
-      {/* ПРАВЫЙ ВЕРХНИЙ УГОЛ: СЕРДЕЧКО И ЦЕНА */}
-      <div className="absolute top-5 right-5 flex items-center gap-3 z-10">
-        <button 
-          onClick={(e) => { e.preventDefault(); toggleFavorite(); }} 
-          className={`transition-all duration-200 hover:scale-110 active:scale-95 ${
-            isFavorite ? 'text-red-500 hover:text-red-600 drop-shadow-sm' : 'text-gray-300 hover:text-red-400'
-          }`}
-          title="В закладки"
-        >
-          <svg className="w-6 h-6" fill={isFavorite ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={isFavorite ? "1" : "2"} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-          </svg>
-        </button>
-
-        <div className="text-[#11a95e] font-bold bg-[#eaf6f0] px-3 py-1 rounded-[4px] text-[13px] tracking-wide border border-[#11a95e]/10">
-          {displayPrice(service.price)}
-        </div>
-      </div>
-
-      {/* ЗАГОЛОВОК */}
-      <Link href={`/service/${service.id}`}>
-        <h2 className="text-[18px] font-extrabold text-[#11a95e] group-hover:underline cursor-pointer pr-36 mb-2 line-clamp-1 relative z-0">
-          {service.title}
-        </h2>
-      </Link>
-
-      <div className="text-[13px] text-gray-600 mb-4 pr-10 leading-relaxed line-clamp-2">
-        {service.description}
-        <Link href={`/service/${service.id}`} className="text-[#11a95e] cursor-pointer hover:underline ml-1 font-medium">
-          {translate('show_all')}
-        </Link>
-      </div>
-
-      {/* ИНФО О ПРОДАВЦЕ */}
-      <div className="flex items-center gap-4 mb-4">
-        <div className="w-[90px] h-[90px] rounded-[6px] bg-gray-100 overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center text-gray-400 font-bold text-3xl shadow-inner">
-          {service.image_url ? (
-             <img src={service.image_url} className="w-full h-full object-cover" alt="" />
-          ) : service.seller_avatar ? (
-             <img src={service.seller_avatar} className="w-full h-full object-cover" alt="" /> 
-          ) : (
-             (service.seller_name ? service.seller_name.charAt(0).toUpperCase() : 'U')
-          )}
-        </div>
-        <div className="text-[13px] text-gray-800 space-y-1">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-yellow-500 font-bold">⭐ {ratingAvg}</span>
-            <span className="text-gray-300">|</span>
-            <span>
-              {translate('buyer')}:{' '}
-              <Link 
-                href={`/user/${service.seller_email}`}
-                className="cursor-pointer font-bold hover:text-[#11a95e] hover:underline transition-colors"
-              >
-                {service.seller_name || 'UNIT_USER'}
-              </Link>
-            </span>
-            {/* ДИНАМИЧЕСКИЙ БЕЙДЖ УРОВНЯ */}
-            <span className={`text-[10px] px-1.5 py-0.5 rounded font-extrabold border flex items-center gap-1 ml-1 ${level.style}`}>
-              {level.icon} {level.text}
-            </span>
+        {isTop && (
+          <div className="absolute top-3 left-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md shadow-md shadow-orange-500/20 z-10">
+            {translate('top_badge') || 'TOP'}
           </div>
-          <div>{translate('projects_on_exchange')}: <span className="font-medium">{service.seller_projects ?? 0}</span></div>
-          <div className="flex items-center gap-1">
-            {translate('hired_on')}: <span className="font-medium text-[#11a95e]">{service.seller_hired ?? 100}%</span>
-            <span className="w-3.5 h-3.5 rounded-full border border-gray-300 text-gray-400 flex items-center justify-center text-[9px] cursor-help bg-gray-50" title="Процент успешно выполненных заказов">?</span>
-          </div>
-        </div>
-      </div>
+        )}
 
-      {/* КНОПКИ */}
-      <div className="flex flex-col sm:flex-row items-center justify-between mt-3 pt-3 border-t border-gray-100 gap-3">
-        <div className="text-[12.5px] text-gray-500 font-medium w-full sm:w-auto flex items-center gap-2">
-          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-          {translate('rest_time')} • {translate('reviews_count')}: <span className="font-bold text-gray-700">{reviewsCount}</span>
-        </div>
-        
-        <div className="flex gap-2 w-full sm:w-auto">
-           {isAdmin && (
-             <button onClick={() => deleteService(service.id)} className="border border-red-500 text-red-500 px-4 py-[8px] rounded-[6px] hover:bg-red-50 transition-colors text-[13px] font-medium">
-               {translate('delete')}
-             </button>
-           )}
-           <Link 
-             href={`/service/${service.id}`}
-             className="px-5 py-[8px] rounded-[6px] font-medium text-[13px] text-[#11a95e] border border-[#11a95e] hover:bg-[#f0fdf4] transition-colors hidden sm:block"
-           >
-             {translate('review_btn')}
-           </Link>
-           <button onClick={() => handleOrder(service.id, service.title)} className={`w-full sm:w-auto px-6 py-[8px] rounded-[6px] font-bold text-[13px] text-white transition-colors shadow-sm ${isTop ? 'bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 shadow-yellow-500/30' : 'bg-[#11a95e] hover:bg-[#0e9552] shadow-[#11a95e]/30'}`}>
-            {translate('order')}
+        {toggleFavorite && (
+          <button onClick={(e) => handleButtonClick(e, toggleFavorite)} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm shadow-sm flex items-center justify-center border border-gray-100 hover:bg-white hover:scale-110 active:scale-95 transition-all z-10 group/fav">
+            <svg className={`w-[18px] h-[18px] transition-colors ${isFavorite ? 'text-red-500 fill-current' : 'text-gray-400 group-hover/fav:text-red-500'}`} fill={isFavorite ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
           </button>
+        )}
+      </div>
+
+      {/* Контент карточки */}
+      <div className={`flex flex-col flex-1 ${isListView ? 'w-full py-2' : 'p-5'}`}>
+        <div className="flex items-center justify-between mb-2.5 text-[12px] font-medium text-gray-400">
+          <div className="flex items-center gap-2 max-w-[70%]">
+            <div className="flex items-center gap-1.5 min-w-0 relative">
+                <div className="w-4 h-4 rounded-full bg-gray-800 text-white flex items-center justify-center font-bold text-[9px] shrink-0">
+                  {(service.seller_name || 'U')[0].toUpperCase()}
+                </div>
+                <span className="truncate text-gray-600 font-bold">{sellerName}</span>
+                
+                {isOnline && (
+                  <span title={translate('online') || "Online"} className="relative flex h-2 w-2 shrink-0 ml-0.5 mt-0.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#11a95e] opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#11a95e]"></span>
+                  </span>
+                )}
+                
+                {service.sellerProfile?.seller_level === 2 && (
+                  <span className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm uppercase tracking-widest shrink-0 ml-1">
+                    {translate('pro') || 'Pro'}
+                  </span>
+                )}
+            </div>
+          </div>
+          <div className="flex items-center gap-1 shrink-0 text-orange-400 font-bold">
+            <span>★</span>
+            <span className="text-gray-700">{service.rating_avg || '5.0'}</span>
+          </div>
+        </div>
+
+        {/* Заголовок услуги с бейджем языка */}
+        <div className="flex items-start gap-2 mb-4">
+          <h3 className={`font-bold text-[#111] leading-snug tracking-tight group-hover:text-[#11a95e] transition-colors line-clamp-2 flex-1 ${isListView ? 'text-[18px] sm:text-[20px]' : 'text-[15px] min-h-[44px]'}`}>
+            {service.title}
+          </h3>
+          <span className="shrink-0 text-[10px] font-bold text-white bg-orange-500 px-1.5 py-0.5 rounded uppercase tracking-wider select-none shadow-sm mt-0.5">
+            {service.language || 'RU'}
+          </span>
+        </div>
+
+        {/* Цена и кнопка */}
+        <div className={`mt-auto flex items-center justify-between border-t border-gray-50 pt-4 ${isListView ? 'sm:justify-end sm:gap-8' : ''}`}>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">{translate('from')}</span>
+            <span className="text-[18px] font-bold text-[#111] leading-none tracking-tight">{displayPrice(service.price)}</span>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {isAdmin && deleteService && (
+              <button 
+                onClick={(e) => handleButtonClick(e, () => deleteService(service.id))} 
+                className="text-gray-400 hover:text-red-500 p-2 transition-colors rounded-full hover:bg-red-50" 
+                title={translate('delete')}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+              </button>
+            )}
+            
+            {handleOrder && !isAdmin && (
+              <button 
+                onClick={(e) => handleButtonClick(e, handleOrder)} 
+                className="bg-gradient-to-r from-[#11a95e] to-emerald-500 hover:from-[#0e9552] hover:to-[#11a95e] text-white text-[12px] font-bold uppercase tracking-wider px-5 py-2.5 rounded-full transition-all shadow-md shadow-emerald-500/20 hover:shadow-lg hover:-translate-y-0.5 active:scale-95"
+              >
+                {translate('order')}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
