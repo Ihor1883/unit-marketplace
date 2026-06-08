@@ -67,10 +67,10 @@ export default function AddServicePage() {
 
   // Инициализация
   useEffect(() => {
+    // Принудительно берем язык из localStorage при загрузке страницы
     const savedLang = localStorage.getItem('unit_lang');
+    console.log("Язык из памяти:", savedLang); // ЧТО ОН ПИШЕТ В КОНСОЛИ?
     if (savedLang) setLang(savedLang);
-    const savedCurrency = localStorage.getItem('unit_currency');
-    if (savedCurrency) setCurrency(savedCurrency);
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
@@ -91,54 +91,44 @@ export default function AddServicePage() {
   };
 
 const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title || !price || !description) {
-      toast.error(translate('fill_req'));
-      return;
-    }
+  e.preventDefault();
+  if (!title || !price || !description) {
+    toast.error("Заполните поля!");
+    return;
+  }
 
-    setIsUploading(true);
+  setIsUploading(true);
 
-    try {
-      // Получаем язык из памяти или стейта
-      const activeLang = localStorage.getItem('unit_lang') || lang || 'EN';
+  try {
+    // Получаем текущий язык прямо из браузера
+    const currentLang = localStorage.getItem('unit_lang') || 'EN';
+    
+    // Формируем данные
+    const serviceData = {
+      title,
+      description,
+      price: Number(price),
+      category,
+      image_url: selectedFile ? await uploadImage(selectedFile) : '',
+      seller_email: user.email,
+      user_id: user.id,
+      language: currentLang // ЭТО ТЕ САМЫЕ ДАННЫЕ
+    };
 
-      // ⚠️ КРИТИЧЕСКИЙ ТЕСТ: Прямо на экране появится окно с текущим значением
-      alert("ДИАГНОСТИКА! Сайт отправляет в базу язык: " + activeLang);
+    console.log("Отправляю в Supabase:", serviceData); // СМОТРИТЕ В КОНСОЛЬ БРАУЗЕРА (F12)
 
-      let finalImageUrl = '';
-      if (selectedFile) {
-        finalImageUrl = await uploadImage(selectedFile);
-      }
+    const { error } = await supabase.from('services').insert([serviceData]);
 
-      const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single();
-      const sellerName = profile?.full_name || user.email.split('@')[0];
-
-      const { error } = await supabase.from('services').insert([
-        {
-          title,
-          description,
-          price: Number(price),
-          category,
-          image_url: finalImageUrl,
-          seller_email: user.email,
-          seller_name: sellerName,
-          user_id: user.id,
-          language: activeLang // Отправляем язык
-        }
-      ]);
-
-      if (error) throw error;
-
-      toast.success(translate('success'));
-      router.push('/profile'); 
-
-    } catch (err: any) {
-      toast.error(translate('err_save') + err.message);
-    } finally {
-      setIsUploading(false);
-    }
-  };
+    if (error) throw error;
+    
+    toast.success("Успешно!");
+    router.push('/profile');
+  } catch (err: any) {
+    toast.error("Ошибка: " + err.message);
+  } finally {
+    setIsUploading(false);
+  }
+};
 
   if (loadingAuth) return <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center font-bold text-[#11a95e]">UNIT...</div>;
 

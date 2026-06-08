@@ -123,7 +123,9 @@ export default function ServiceCard({
           <h3 className={`font-bold text-[#111] leading-snug tracking-tight group-hover:text-[#11a95e] transition-colors line-clamp-2 flex-1 ${isListView ? 'text-[18px] sm:text-[20px]' : 'text-[15px] min-h-[44px]'}`}>
             {service.title}
           </h3>
-          <span className="shrink-0 text-[10px] font-bold text-white bg-orange-500 px-1.5 py-0.5 rounded uppercase tracking-wider select-none shadow-sm mt-0.5">
+          
+          {/* Значок языка (берет значение из базы, если пусто - RU) */}
+          <span className="shrink-0 text-[10px] font-bold text-white bg-orange-500 px-1.5 py-0.5 rounded uppercase tracking-wider select-none shadow-sm mt-0.5 min-w-[20px] flex items-center justify-center">
             {service.language || 'RU'}
           </span>
         </div>
