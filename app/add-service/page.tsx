@@ -100,10 +100,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   setIsUploading(true);
 
   try {
-    // Получаем текущий язык прямо из браузера
-    const currentLang = localStorage.getItem('unit_lang') || 'EN';
-    
-    // Формируем данные
+   // Формируем данные, ИСПОЛЬЗУЯ ЖЕЛЕЗОБЕТОННЫЙ СТЕЙТ (lang), а не память браузера
     const serviceData = {
       title,
       description,
@@ -112,7 +109,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       image_url: selectedFile ? await uploadImage(selectedFile) : '',
       seller_email: user.email,
       user_id: user.id,
-      language: currentLang // ЭТО ТЕ САМЫЕ ДАННЫЕ
+      language: lang 
     };
 
     console.log("Отправляю в Supabase:", serviceData); // СМОТРИТЕ В КОНСОЛЬ БРАУЗЕРА (F12)
