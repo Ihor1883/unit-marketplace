@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link'; 
 
 // === СУПАБАЗА И КОМПОНЕНТЫ ===
-import { supabase } from './supabase'; 
+import { supabase } from './supabase';
 import ServiceCard from './components/ServiceCard';
 
 // === ХУКИ ===
