@@ -1,12 +1,11 @@
 "use client";
 import { useState, FormEvent } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import { LogIn, Mail, Lock, Loader2, ChevronLeft, Sparkles, Eye, EyeOff, User, Calendar } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-// Обрати внимание: я использую креды из ТВОЕГО скриншота, чтобы ничего не сломать
-// ДОБАВЬ ЭТО (путь должен быть таким же, как в app/page.tsx, возможно "../supabase" или "./supabase"):
+// === ВОТ ЭТА СТРОЧКА РЕШИТ ПРОБЛЕМУ ===
+// Мы берем готовое подключение из твоего проекта, а не создаем новое!
 import { supabase } from '../supabase';
 
 export default function AuthPage() {
