@@ -1,7 +1,7 @@
 "use client";
 import { useState, FormEvent } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { LogIn, Mail, Lock, Loader2, ChevronLeft, Sparkles } from 'lucide-react';
+import { LogIn, Mail, Lock, Loader2, ChevronLeft, Sparkles, Eye, EyeOff, User, Calendar } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -16,21 +16,68 @@ export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
+  
+  // НОВЫЕ СОСТОЯНИЯ:
+  const [fullName, setFullName] = useState('');
+  const [birthDate, setBirthDate] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  // ФУНКЦИЯ ПРОВЕРКИ ВОЗРАСТА (18+)
+  const checkIsAdult = (dob: string) => {
+    if (!dob) return false;
+    const today = new Date();
+    const birthDateObj = new Date(dob);
+    let age = today.getFullYear() - birthDateObj.getFullYear();
+    const monthDiff = today.getMonth() - birthDateObj.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDateObj.getDate())) {
+      age--;
+    }
+    return age >= 18;
+  };
 
   const handleAuth = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = isSignUp 
-      ? await supabase.auth.signUp({ email, password })
-      : await supabase.auth.signInWithPassword({ email, password });
+    if (isSignUp) {
+      // Проверка возраста перед отправкой в Supabase
+      if (!checkIsAdult(birthDate)) {
+        alert("Вам должно быть не менее 18 лет для регистрации.");
+        setLoading(false);
+        return;
+      }
 
-    if (error) {
-      alert(error.message);
+      // Регистрация с дополнительными данными
+      const { error } = await supabase.auth.signUp({ 
+        email, 
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            birth_date: birthDate
+          }
+        }
+      });
+
+      if (error) {
+        alert(error.message);
+      } else {
+        alert("Проверьте почту для подтверждения!");
+        router.push('/');
+      }
     } else {
-      alert(isSignUp ? "Проверьте почту для подтверждения!" : "Вы вошли!");
-      router.push('/');
+      // Обычный вход
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      
+      if (error) {
+        alert(error.message);
+      } else {
+        alert("Вы вошли!");
+        router.push('/');
+      }
     }
+    
     setLoading(false);
   };
 
@@ -56,6 +103,35 @@ export default function AuthPage() {
           </p>
 
           <form onSubmit={handleAuth} className="space-y-4">
+            
+            {/* ПОЛЯ ИМЕНИ И ДАТЫ РОЖДЕНИЯ (ПОКАЗЫВАЮТСЯ ТОЛЬКО ПРИ РЕГИСТРАЦИИ) */}
+            {isSignUp && (
+              <>
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                  <input 
+                    type="text" 
+                    placeholder="ИМЯ И ФАМИЛИЯ" 
+                    required={isSignUp}
+                    className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl py-4 pl-12 pr-5 font-bold outline-none focus:border-blue-500 transition-all"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                  />
+                </div>
+
+                <div className="relative">
+                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                  <input 
+                    type="date" 
+                    required={isSignUp}
+                    className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl py-4 pl-12 pr-5 font-bold outline-none focus:border-blue-500 transition-all text-gray-500"
+                    value={birthDate}
+                    onChange={(e) => setBirthDate(e.target.value)}
+                  />
+                </div>
+              </>
+            )}
+
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
               <input 
@@ -71,13 +147,21 @@ export default function AuthPage() {
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
               <input 
-                type="password" 
+                type={showPassword ? "text" : "password"} 
                 placeholder="PASSWORD" 
                 required
-                className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl py-4 pl-12 pr-5 font-bold outline-none focus:border-blue-500 transition-all"
+                className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl py-4 pl-12 pr-12 font-bold outline-none focus:border-blue-500 transition-all"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+              {/* КНОПКА-ГЛАЗОК */}
+              <button 
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
 
             <button 
