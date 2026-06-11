@@ -692,7 +692,7 @@ export default function HomePage() {
               </div>
             ) : (
               <div className="flex items-center gap-4">
-                <button onClick={() => setShowAuthModal(true)} className="text-[#11a95e] hover:text-emerald-400 transition-colors font-bold">{translate('login')}</button>
+                <Link href="/auth" className="text-[#11a95e] hover:text-emerald-400 transition-colors font-bold">{translate('login')}</Link>
                 <button onClick={handleAdminLogin} className="px-5 py-2 rounded-full bg-[#222] hover:bg-[#111] transition-colors text-white text-[11px] font-bold shadow-sm hover:shadow-md">
                   {translate('admin')}
                 </button>
@@ -1219,9 +1219,9 @@ export default function HomePage() {
                   </button>
                 </>
               ) : (
-                <button onClick={() => { setShowAuthModal(true); setIsMobileMenuOpen(false); }} className="text-left text-[#11a95e] hover:text-emerald-400 transition-colors">
+                <Link href="/auth" onClick={() => setIsMobileMenuOpen(false)} className="text-left text-[#11a95e] hover:text-emerald-400 transition-colors block">
                   {translate('login')}
-                </button>
+                </Link>
               )}
               
               <button onClick={() => { handleAdminLogin(); setIsMobileMenuOpen(false); }} className="text-left text-gray-400 mt-auto pt-6 border-t border-gray-100 hover:text-[#111] transition-colors">
@@ -1232,7 +1232,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* АУТЕНТИФИКАЦИЯ */}
+      {/* АУТЕНТИФИКАЦИЯ (Больше не вызывается через кнопку "Войти", но пусть пока остается для обратной совместимости) */}
       {showAuthModal && (
         <AuthModal onClose={() => setShowAuthModal(false)} translate={translate} />
       )}

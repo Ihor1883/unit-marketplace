@@ -5,6 +5,7 @@ import { LogIn, Mail, Lock, Loader2, ChevronLeft, Sparkles, Eye, EyeOff, User, C
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+// Обрати внимание: я использую креды из ТВОЕГО скриншота, чтобы ничего не сломать
 const supabase = createClient(
   'https://bvkynrssmjwvflqefhcn.supabase.co', 
   'sb_publishable_tqAPmwHev9W5Z4rIbqtouA_oaCXi2KR'
@@ -96,7 +97,7 @@ export default function AuthPage() {
           </div>
 
           <h1 className="text-3xl font-[1000] text-center uppercase tracking-tighter mb-2">
-            {isSignUp ? 'Создать аккаунт' : 'С возвращением'}
+           {isSignUp ? 'Создать аккаунт' : 'С возвращением'}
           </h1>
           <p className="text-center text-gray-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-10">
             GlobalTask Marketplace
