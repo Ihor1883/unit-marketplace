@@ -6,10 +6,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 // Обрати внимание: я использую креды из ТВОЕГО скриншота, чтобы ничего не сломать
-const supabase = createClient(
-  'https://bvkynrssmjwvflqefhcn.supabase.co', 
-  'sb_publishable_tqAPmwHev9W5Z4rIbqtouA_oaCXi2KR'
-);
+// ДОБАВЬ ЭТО (путь должен быть таким же, как в app/page.tsx, возможно "../supabase" или "./supabase"):
+import { supabase } from '../supabase';
 
 export default function AuthPage() {
   const router = useRouter();
