@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'UNIT Marketplace — Цифровые Услуги',
     description: 'Надежная биржа цифровых услуг. Быстрый заказ, безопасная оплата и чат с фрилансерами.',
-    url: 'https://unit-marketplace.vercel.app', 
+    url: 'https://www.unitmarketplace.com', 
     siteName: 'UNIT',
     images: [
       {
