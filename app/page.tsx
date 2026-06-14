@@ -530,6 +530,74 @@ export default function HomePage() {
       return true;
     });
   }, [tasks, searchQuery, activeCategory, budgetRanges, budgetMin, budgetMax, lang]);
+  const mockServices = [
+    {
+      id: "mock1",
+      title: "Создание премиум Landing Page под ключ",
+      price: 2500,
+      category: "IT",
+      rating_avg: "5.0",
+      reviews_count: 42,
+      is_top: true,
+      user_id: "online1",
+      image_url: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80"
+    },
+    {
+      id: "mock2",
+      title: "SEO-оптимизация и вывод сайта в ТОП-3",
+      price: 1200,
+      category: "MARKETING",
+      rating_avg: "4.9",
+      reviews_count: 18,
+      is_top: false,
+      user_id: "offline2",
+      image_url: "https://images.unsplash.com/photo-1572177812156-58036aae439c?w=600&q=80"
+    },
+    {
+      id: "mock3",
+      title: "Разработка фирменного стиля и логотипа",
+      price: 850,
+      category: "DESIGN",
+      rating_avg: "5.0",
+      reviews_count: 115,
+      is_top: true,
+      user_id: "online3",
+      image_url: "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&q=80"
+    },
+    {
+      id: "mock4",
+      title: "Написание Telegram-бота (Python, Node.js)",
+      price: 1800,
+      category: "IT",
+      rating_avg: "4.8",
+      reviews_count: 7,
+      is_top: false,
+      user_id: "online4",
+      image_url: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&q=80"
+    },
+    {
+      id: "mock5",
+      title: "Монтаж Reels/TikTok видео, динамичные титры",
+      price: 450,
+      category: "VIDEO",
+      rating_avg: "5.0",
+      reviews_count: 84,
+      is_top: true,
+      user_id: "offline5",
+      image_url: "https://images.unsplash.com/photo-1574717024453-354056a3df3f?w=600&q=80"
+    },
+    {
+      id: "mock6",
+      title: "Настройка таргетированной рекламы FB/Inst",
+      price: 900,
+      category: "MARKETING",
+      rating_avg: "4.7",
+      reviews_count: 22,
+      is_top: false,
+      user_id: "online6",
+      image_url: "https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?w=600&q=80"
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] font-sans text-[#222] flex flex-col" suppressHydrationWarning>
