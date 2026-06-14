@@ -530,6 +530,8 @@ export default function HomePage() {
       return true;
     });
   }, [tasks, searchQuery, activeCategory, budgetRanges, budgetMin, budgetMax, lang]);
+
+  // === ВРЕМЕННЫЙ МАССИВ-ЗАГЛУШКА ДЛЯ СКРИНШОТОВ (ТЕПЕРЬ 16 КАРТОЧЕК) ===
   const mockServices = [
     {
       id: "mock1",
@@ -576,17 +578,6 @@ export default function HomePage() {
       image_url: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&q=80"
     },
     {
-      id: "mock5",
-      title: "Монтаж Reels/TikTok видео, динамичные титры",
-      price: 450,
-      category: "VIDEO",
-      rating_avg: "5.0",
-      reviews_count: 84,
-      is_top: true,
-      user_id: "offline5",
-      image_url: "https://images.unsplash.com/photo-1574717024453-354056a3df3f?w=600&q=80"
-    },
-    {
       id: "mock6",
       title: "Настройка таргетированной рекламы FB/Inst",
       price: 900,
@@ -596,6 +587,94 @@ export default function HomePage() {
       is_top: false,
       user_id: "online6",
       image_url: "https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?w=600&q=80"
+    },
+    {
+      id: "mock8",
+      title: "Разработка уникального 3D-логотипа",
+      price: 2100,
+      category: "DESIGN",
+      rating_avg: "5.0",
+      reviews_count: 89,
+      is_top: false,
+      user_id: "offline8",
+      image_url: "https://images.unsplash.com/photo-1626785774625-ddcddc3445e9?w=600&q=80"
+    },
+    {
+      id: "mock10",
+      title: "Создание стильной презентации (PowerPoint/Keynote)",
+      price: 1200,
+      category: "DESIGN",
+      rating_avg: "5.0",
+      reviews_count: 29,
+      is_top: false,
+      user_id: "online10",
+      image_url: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=600&q=80"
+    },
+    {
+      id: "mock11",
+      title: "Креативный копирайтинг для соцсетей",
+      price: 600,
+      category: "MARKETING",
+      rating_avg: "4.8",
+      reviews_count: 14,
+      is_top: false,
+      user_id: "offline11",
+      image_url: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&q=80"
+    },
+    {
+      id: "mock12",
+      title: "Настройка Email-маркетинга и автоворонок",
+      price: 1900,
+      category: "MARKETING",
+      rating_avg: "5.0",
+      reviews_count: 110,
+      is_top: true,
+      user_id: "online12",
+      image_url: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&q=80"
+    },
+    {
+      id: "mock13",
+      title: "Адаптивная верстка сайта HTML/CSS/JS",
+      price: 2500,
+      category: "IT",
+      rating_avg: "4.9",
+      reviews_count: 45,
+      is_top: false,
+      user_id: "online13",
+      image_url: "https://images.unsplash.com/photo-1547658719-da2b51169166?w=600&q=80"
+    },
+    {
+      id: "mock14",
+      title: "Полная консультация по продвижению (SMM)",
+      price: 1500,
+      category: "MARKETING",
+      rating_avg: "5.0",
+      reviews_count: 62,
+      is_top: false,
+      user_id: "online14",
+      image_url: "https://images.unsplash.com/photo-1562577309-4932fdd64cd1?w=600&q=80"
+    },
+    {
+      id: "mock15",
+      title: "Озвучивание текста (дикторы на разных языках)",
+      price: 1000,
+      category: "AUDIO",
+      rating_avg: "4.7",
+      reviews_count: 19,
+      is_top: false,
+      user_id: "offline15",
+      image_url: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=600&q=80"
+    },
+    {
+      id: "mock16",
+      title: "Глубокая настройка контекстной рекламы Google Ads",
+      price: 3000,
+      category: "MARKETING",
+      rating_avg: "5.0",
+      reviews_count: 8,
+      is_top: true,
+      user_id: "online16",
+      image_url: "" // <-- КАРТОЧКА БЕЗ ИЗОБРАЖЕНИЯ (ЛОГОТИПА) 
     }
   ];
 
@@ -1062,7 +1141,7 @@ export default function HomePage() {
                   {translate('hero_desc')}
                 </span>
                 <span className="text-[14px] font-bold text-[#111]">
-                  {translate('found') || 'Найдено:'} <span className="text-orange-500">{viewModeType === 'services' ? sortedServices.length : filteredTasks.length}</span>
+                  {translate('found') || 'Найдено:'} <span className="text-orange-500">{viewModeType === 'services' ? mockServices.length : filteredTasks.length}</span>
                 </span>
               </div>
               
@@ -1109,11 +1188,11 @@ export default function HomePage() {
             </div>
 
             <section className={`w-full ${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch' : 'flex flex-col gap-4'}`}>
-              {loading ? (
+              {false ? ( /* <-- ОТКЛЮЧИЛ ПРЕЛОАДЕР */
                 <div className="col-span-full py-20 text-center animate-pulse text-gray-400 font-medium text-lg">{translate('loading') || 'Загрузка...'}</div>
               ) : viewModeType === 'services' ? (
-                /* РЕНДЕР КАТАЛОГА УСЛУГ */
-                sortedServices.length === 0 ? (
+                /* РЕНДЕР КАТАЛОГА УСЛУГ (ПОДМЕНЕН НА MOCK) */
+                mockServices.length === 0 ? (
                   <div className="col-span-full bg-white p-12 rounded-2xl border border-dashed border-gray-300 text-center">
                    <svg className="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                    <p className="text-gray-500 font-medium text-[15px]">
@@ -1126,20 +1205,20 @@ export default function HomePage() {
                    )}
                   </div>
                 ) : (
-                  sortedServices.map((s) => (
+                  mockServices.map((s) => (
                     <div key={s.id} className="relative group/hide flex flex-col">
                       <ServiceCard 
-                        service={s} 
+                        service={s as any} 
                         isAdmin={false}
                         displayPrice={displayPrice} 
                         translate={translate} 
-                        handleOrder={() => handleOrder(s.id, s.title)} 
+                        handleOrder={() => {}} 
                         deleteService={() => {}}
-                        isFavorite={favorites.includes(s.id)}
-                        toggleFavorite={() => handleToggleFavorite(s.id)}
+                        isFavorite={false}
+                        toggleFavorite={() => {}}
                         isTop={s.is_top}
                         viewMode={viewMode}
-                        isOnline={onlineUsers.includes(s.user_id || s.sellerProfile?.id)}
+                        isOnline={true}
                       />
                       
                       <div className="absolute inset-0 z-10 pointer-events-none flex items-start justify-center pt-[70px] opacity-0 group-hover/hide:opacity-100 transition-opacity">
@@ -1164,7 +1243,7 @@ export default function HomePage() {
                   ))
                 )
               ) : (
-                /* РЕНДЕР БИРЖИ ЗАДАНИЙ */
+                /* РЕНДЕР БИРЖИ ЗАДАНИЙ (ОСТАВЛЕН БЕЗ ИЗМЕНЕНИЙ) */
                 filteredTasks.length === 0 ? (
                   <div className="col-span-full bg-white p-12 rounded-2xl border border-dashed border-gray-300 text-center">
                    <svg className="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -1300,7 +1379,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* АУТЕНТИФИКАЦИЯ (Больше не вызывается через кнопку "Войти", но пусть пока остается для обратной совместимости) */}
+      {/* АУТЕНТИФИКАЦИЯ */}
       {showAuthModal && (
         <AuthModal onClose={() => setShowAuthModal(false)} translate={translate} />
       )}
@@ -1320,7 +1399,7 @@ export default function HomePage() {
         }}
       />
 
-      {/* ОСТАВИТЬ ОТЗЫВ (РАСШИРЕННЫЙ) */}
+      {/* ОСТАВИТЬ ОТЗЫВ */}
       <ReviewModal 
         isOpen={!!reviewModal}
         onClose={() => setReviewModal(null)}
