@@ -1002,14 +1002,14 @@ export default function ProfilePage() {
                   value={editForm.language || 'RU'} 
                   onChange={e => setEditForm({...editForm, language: e.target.value})}
                 >
-                  <option value="RU">🇷🇺 Русский</option>
-                  <option value="EN">🇬🇧 English</option>
-                  <option value="PL">🇵🇱 Polski</option>
-                  <option value="DE">🇩🇪 Deutsch</option>
-                  <option value="ES">🇪🇸 Español</option>
-                  <option value="IT">🇮🇹 Italiano</option>
-                  <option value="FR">🇫🇷 Français</option>
-                  <option value="UA">🇺🇦 Українська</option>
+                  <option value="RU">Русский (RU)</option>
+<option value="EN">English (EN)</option>
+<option value="PL">Polski (PL)</option>
+<option value="DE">Deutsch (DE)</option>
+<option value="ES">Español (ES)</option>
+<option value="IT">Italiano (IT)</option>
+<option value="FR">Français (FR)</option>
+<option value="UA">Українська (UA)</option>
                 </select>
               </div>
               
@@ -1133,14 +1133,14 @@ export default function ProfilePage() {
                     value={taskForm.language || 'RU'} 
                     onChange={e => setTaskForm({...taskForm, language: e.target.value})}
                   >
-                    <option value="RU">🇷🇺 RU</option>
-                    <option value="EN">🇬🇧 EN</option>
-                    <option value="PL">🇵🇱 PL</option>
-                    <option value="DE">🇩🇪 DE</option>
-                    <option value="ES">🇪🇸 ES</option>
-                    <option value="IT">🇮🇹 IT</option>
-                    <option value="FR">🇫🇷 FR</option>
-                    <option value="UA">🇺🇦 UA</option>
+<option value="RU">Русский (RU)</option>
+<option value="EN">English (EN)</option>
+<option value="PL">Polski (PL)</option>
+<option value="DE">Deutsch (DE)</option>
+<option value="ES">Español (ES)</option>
+<option value="IT">Italiano (IT)</option>
+<option value="FR">Français (FR)</option>
+<option value="UA">Українська (UA)</option>
                   </select>
                 </div>
               </div>
