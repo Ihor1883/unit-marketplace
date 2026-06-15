@@ -531,153 +531,6 @@ export default function HomePage() {
     });
   }, [tasks, searchQuery, activeCategory, budgetRanges, budgetMin, budgetMax, lang]);
 
-  // === ВРЕМЕННЫЙ МАССИВ-ЗАГЛУШКА ДЛЯ СКРИНШОТОВ (ТЕПЕРЬ 16 КАРТОЧЕК) ===
-  const mockServices = [
-    {
-      id: "mock1",
-      title: "Создание премиум Landing Page под ключ",
-      price: 2500,
-      category: "IT",
-      rating_avg: "5.0",
-      reviews_count: 42,
-      is_top: true,
-      user_id: "online1",
-      image_url: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80"
-    },
-    {
-      id: "mock2",
-      title: "SEO-оптимизация и вывод сайта в ТОП-3",
-      price: 1200,
-      category: "MARKETING",
-      rating_avg: "4.9",
-      reviews_count: 18,
-      is_top: false,
-      user_id: "offline2",
-      image_url: "https://images.unsplash.com/photo-1572177812156-58036aae439c?w=600&q=80"
-    },
-    {
-      id: "mock3",
-      title: "Разработка фирменного стиля и логотипа",
-      price: 850,
-      category: "DESIGN",
-      rating_avg: "5.0",
-      reviews_count: 115,
-      is_top: true,
-      user_id: "online3",
-      image_url: "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&q=80"
-    },
-    {
-      id: "mock4",
-      title: "Написание Telegram-бота (Python, Node.js)",
-      price: 1800,
-      category: "IT",
-      rating_avg: "4.8",
-      reviews_count: 7,
-      is_top: false,
-      user_id: "online4",
-      image_url: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&q=80"
-    },
-    {
-      id: "mock6",
-      title: "Настройка таргетированной рекламы FB/Inst",
-      price: 900,
-      category: "MARKETING",
-      rating_avg: "4.7",
-      reviews_count: 22,
-      is_top: false,
-      user_id: "online6",
-      image_url: "https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?w=600&q=80"
-    },
-    {
-      id: "mock8",
-      title: "Разработка уникального 3D-логотипа",
-      price: 2100,
-      category: "DESIGN",
-      rating_avg: "5.0",
-      reviews_count: 89,
-      is_top: false,
-      user_id: "offline8",
-      image_url: "https://images.unsplash.com/photo-1626785774625-ddcddc3445e9?w=600&q=80"
-    },
-    {
-      id: "mock10",
-      title: "Создание стильной презентации (PowerPoint/Keynote)",
-      price: 1200,
-      category: "DESIGN",
-      rating_avg: "5.0",
-      reviews_count: 29,
-      is_top: false,
-      user_id: "online10",
-      image_url: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=600&q=80"
-    },
-    {
-      id: "mock11",
-      title: "Креативный копирайтинг для соцсетей",
-      price: 600,
-      category: "MARKETING",
-      rating_avg: "4.8",
-      reviews_count: 14,
-      is_top: false,
-      user_id: "offline11",
-      image_url: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&q=80"
-    },
-    {
-      id: "mock12",
-      title: "Настройка Email-маркетинга и автоворонок",
-      price: 1900,
-      category: "MARKETING",
-      rating_avg: "5.0",
-      reviews_count: 110,
-      is_top: true,
-      user_id: "online12",
-      image_url: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&q=80"
-    },
-    {
-      id: "mock13",
-      title: "Адаптивная верстка сайта HTML/CSS/JS",
-      price: 2500,
-      category: "IT",
-      rating_avg: "4.9",
-      reviews_count: 45,
-      is_top: false,
-      user_id: "online13",
-      image_url: "https://images.unsplash.com/photo-1547658719-da2b51169166?w=600&q=80"
-    },
-    {
-      id: "mock14",
-      title: "Полная консультация по продвижению (SMM)",
-      price: 1500,
-      category: "MARKETING",
-      rating_avg: "5.0",
-      reviews_count: 62,
-      is_top: false,
-      user_id: "online14",
-      image_url: "https://images.unsplash.com/photo-1562577309-4932fdd64cd1?w=600&q=80"
-    },
-    {
-      id: "mock15",
-      title: "Озвучивание текста (дикторы на разных языках)",
-      price: 1000,
-      category: "AUDIO",
-      rating_avg: "4.7",
-      reviews_count: 19,
-      is_top: false,
-      user_id: "offline15",
-      image_url: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=600&q=80"
-    },
-    {
-      id: "mock16",
-      title: "Глубокая настройка контекстной рекламы Google Ads",
-      price: 3000,
-      category: "MARKETING",
-      rating_avg: "5.0",
-      reviews_count: 8,
-      is_top: true,
-      user_id: "online16",
-      image_url: "" // <-- КАРТОЧКА БЕЗ ИЗОБРАЖЕНИЯ (ЛОГОТИПА) 
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-[#F8F9FA] font-sans text-[#222] flex flex-col" suppressHydrationWarning>
       
@@ -893,7 +746,7 @@ export default function HomePage() {
                     : 'text-gray-600 hover:text-gray-900 hover:bg-white/40'
                 }`}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                 {translate('tasks')}
               </button>
             </div>
@@ -1141,7 +994,7 @@ export default function HomePage() {
                   {translate('hero_desc')}
                 </span>
                 <span className="text-[14px] font-bold text-[#111]">
-                  {translate('found') || 'Найдено:'} <span className="text-orange-500">{viewModeType === 'services' ? mockServices.length : filteredTasks.length}</span>
+                  {translate('found') || 'Найдено:'} <span className="text-orange-500">{viewModeType === 'services' ? sortedServices.length : filteredTasks.length}</span>
                 </span>
               </div>
               
@@ -1188,11 +1041,11 @@ export default function HomePage() {
             </div>
 
             <section className={`w-full ${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch' : 'flex flex-col gap-4'}`}>
-              {false ? ( /* <-- ОТКЛЮЧИЛ ПРЕЛОАДЕР */
+              {loading ? (
                 <div className="col-span-full py-20 text-center animate-pulse text-gray-400 font-medium text-lg">{translate('loading') || 'Загрузка...'}</div>
               ) : viewModeType === 'services' ? (
-                /* РЕНДЕР КАТАЛОГА УСЛУГ (ПОДМЕНЕН НА MOCK) */
-                mockServices.length === 0 ? (
+                /* РЕНДЕР КАТАЛОГА УСЛУГ ИЗ SUPABASE */
+                sortedServices.length === 0 ? (
                   <div className="col-span-full bg-white p-12 rounded-2xl border border-dashed border-gray-300 text-center">
                    <svg className="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                    <p className="text-gray-500 font-medium text-[15px]">
@@ -1205,20 +1058,20 @@ export default function HomePage() {
                    )}
                   </div>
                 ) : (
-                  mockServices.map((s) => (
+                  sortedServices.map((s) => (
                     <div key={s.id} className="relative group/hide flex flex-col">
                       <ServiceCard 
-                        service={s as any} 
+                        service={s} 
                         isAdmin={false}
                         displayPrice={displayPrice} 
                         translate={translate} 
-                        handleOrder={() => {}} 
+                        handleOrder={() => handleOrder(s.id, s.title)} 
                         deleteService={() => {}}
-                        isFavorite={false}
-                        toggleFavorite={() => {}}
+                        isFavorite={favorites.includes(s.id)}
+                        toggleFavorite={() => handleToggleFavorite(s.id)}
                         isTop={s.is_top}
                         viewMode={viewMode}
-                        isOnline={true}
+                        isOnline={onlineUsers.includes(s.user_id || s.sellerProfile?.id)}
                       />
                       
                       <div className="absolute inset-0 z-10 pointer-events-none flex items-start justify-center pt-[70px] opacity-0 group-hover/hide:opacity-100 transition-opacity">
@@ -1243,7 +1096,7 @@ export default function HomePage() {
                   ))
                 )
               ) : (
-                /* РЕНДЕР БИРЖИ ЗАДАНИЙ (ОСТАВЛЕН БЕЗ ИЗМЕНЕНИЙ) */
+                /* РЕНДЕР БИРЖИ ЗАДАНИЙ ИЗ SUPABASE */
                 filteredTasks.length === 0 ? (
                   <div className="col-span-full bg-white p-12 rounded-2xl border border-dashed border-gray-300 text-center">
                    <svg className="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -1399,7 +1252,7 @@ export default function HomePage() {
         }}
       />
 
-      {/* ОСТАВИТЬ ОТЗЫВ */}
+      {/* ОСТАВИТЬ ОТЗЫВ (РАСШИРЕННЫЙ) */}
       <ReviewModal 
         isOpen={!!reviewModal}
         onClose={() => setReviewModal(null)}
