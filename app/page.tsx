@@ -104,25 +104,55 @@ export default function HomePage() {
     localStorage.setItem('unit_currency', newCurrency);
   };
 
-  // Инициализация локальных настроек
+// Инициализация локальных настроек и языка по IP-адресу
   useEffect(() => {
     let isMounted = true;
-    const initSettings = () => {
+
+    const initSettings = async () => {
+      // Валюта (оставляем без изменений)
+      const savedCurrency = localStorage.getItem('unit_currency');
+      if (savedCurrency && isMounted) setCurrency(savedCurrency);
+
+      // 1. Если пользователь уже заходил и менял язык — берем его выбор
       const savedLang = localStorage.getItem('unit_lang');
       if (savedLang) {
         if (isMounted) setLang(savedLang);
-      } else {
+        return; 
+      }
+
+      // 2. Если зашел впервые — определяем страну по IP
+      try {
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        const country = data.country_code; // Получаем код страны (PL, DE, RU и т.д.)
+
+        let autoLang = 'EN'; // Язык по умолчанию
+
+        // Сопоставляем страны с языками вашего маркетплейса
+        if (['RU', 'BY', 'KZ', 'UA'].includes(country)) autoLang = 'RU';
+        else if (country === 'PL') autoLang = 'PL';
+        else if (['DE', 'AT', 'CH'].includes(country)) autoLang = 'DE';
+        else if (['ES', 'AR', 'MX'].includes(country)) autoLang = 'ES';
+        else if (country === 'IT') autoLang = 'IT';
+        else if (['FR', 'BE'].includes(country)) autoLang = 'FR';
+
+        if (isMounted) {
+          setLang(autoLang);
+          localStorage.setItem('unit_lang', autoLang);
+        }
+      } catch (error) {
+        // 3. Резервный вариант, если сервис IP заблокирован — берем язык браузера
         const browserLang = navigator.language.substring(0, 2).toUpperCase();
         const supportedLangs = ['RU', 'EN', 'PL', 'DE', 'ES', 'IT', 'FR'];
-        const defaultLang = supportedLangs.includes(browserLang) ? browserLang : 'EN';
+        const fallbackLang = supportedLangs.includes(browserLang) ? browserLang : 'EN';
+        
         if (isMounted) {
-          setLang(defaultLang);
-          localStorage.setItem('unit_lang', defaultLang);
+          setLang(fallbackLang);
+          localStorage.setItem('unit_lang', fallbackLang);
         }
       }
-      const savedCurrency = localStorage.getItem('unit_currency');
-      if (savedCurrency && isMounted) setCurrency(savedCurrency);
     };
+
     initSettings();
     return () => { isMounted = false; };
   }, []);
