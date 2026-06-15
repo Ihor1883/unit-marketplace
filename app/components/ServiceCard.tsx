@@ -50,6 +50,23 @@ export default function ServiceCard({
 
   const isListView = viewMode === 'list';
 
+  // Функция для получения флага по коду языка
+  const getLanguageFlag = (langCode: string) => {
+    switch (langCode?.toUpperCase()) {
+      case 'RU': return '🇷🇺';
+      case 'EN': return '🇬🇧';
+      case 'PL': return '🇵🇱';
+      case 'DE': return '🇩🇪';
+      case 'ES': return '🇪🇸';
+      case 'IT': return '🇮🇹';
+      case 'FR': return '🇫🇷';
+      case 'UA': return '🇺🇦';
+      default: return '🌐';
+    }
+  };
+
+  const displayLang = service.language || 'RU'; // RU по умолчанию для старых карточек
+
   return (
     <div 
       onClick={navigateToDetails}
@@ -124,9 +141,10 @@ export default function ServiceCard({
             {service.title}
           </h3>
           
-          {/* Значок языка (берет значение из базы, если пусто - RU) */}
-          <span className="shrink-0 text-[10px] font-bold text-white bg-orange-500 px-1.5 py-0.5 rounded uppercase tracking-wider select-none shadow-sm mt-0.5 min-w-[20px] flex items-center justify-center">
-            {service.language || 'RU'}
+          {/* Обновленный значок языка с флагом */}
+          <span className="shrink-0 text-[10px] font-bold text-gray-600 bg-gray-100 border border-gray-200 px-1.5 py-0.5 rounded uppercase tracking-wider select-none mt-0.5 flex items-center gap-1 shadow-sm">
+            <span className="text-[12px] leading-none">{getLanguageFlag(displayLang)}</span>
+            {displayLang}
           </span>
         </div>
 
