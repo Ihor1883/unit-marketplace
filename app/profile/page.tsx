@@ -97,6 +97,17 @@ const CATEGORY_HINTS: Record<string, { price: string, titlePh: string, descPh: s
   BUSINESS: { price: "100 - 1000", titlePh: "Например: Составить бизнес-план для кофейни", descPh: "Укажите масштаб бизнеса, какие именно финансовые расчеты требуются, в каком формате нужен итог..." },
 };
 
+const AVAILABLE_LANGS = [
+  { code: 'RU', name: 'Русский' },
+  { code: 'EN', name: 'English' },
+  { code: 'PL', name: 'Polski' },
+  { code: 'DE', name: 'Deutsch' },
+  { code: 'ES', name: 'Español' },
+  { code: 'IT', name: 'Italiano' },
+  { code: 'FR', name: 'Français' },
+  { code: 'UA', name: 'Українська' }
+];
+
 export default function ProfilePage() {
   const router = useRouter();
   
@@ -123,6 +134,7 @@ export default function ProfilePage() {
   const [bio, setBio] = useState('');
   const [skills, setSkills] = useState('');
   const [contacts, setContacts] = useState('');
+  const [spokenLanguages, setSpokenLanguages] = useState<{code: string, level: number}[]>([]); // НОВЫЙ СТЕЙТ ДЛЯ ЯЗЫКОВ
   const [showOnline, setShowOnline] = useState(true);
   const [role, setRole] = useState<'client' | 'freelancer' | 'both'>('both');
   const [savingProfile, setSavingProfile] = useState(false);
@@ -278,6 +290,7 @@ export default function ProfilePage() {
       setBio(profile.bio || ''); 
       setContacts(profile.contacts || '');
       setSkills(profile.skills || ''); 
+      setSpokenLanguages(profile.spoken_languages || []);
       setShowOnline(profile.show_online ?? true);
       setRole(profile.role || 'both');
       
@@ -318,6 +331,7 @@ export default function ProfilePage() {
       bio: bio, 
       contacts: contacts,
       skills: skills,
+      spoken_languages: spokenLanguages,
       show_online: showOnline,
       updated_at: new Date() 
     });
@@ -686,6 +700,72 @@ export default function ProfilePage() {
                   <textarea value={bio} onChange={(e) => setBio(e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[14px] font-medium focus:border-orange-400 focus:ring-2 focus:ring-orange-500/10 focus:bg-white outline-none transition-all h-[110px] resize-none shadow-inner" />
                 </div>
 
+                {/* === БЛОК ВЛАДЕНИЯ ЯЗЫКАМИ === */}
+                <div className="flex flex-col gap-3 pt-4 border-t border-gray-100 mt-2">
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" /></svg>
+                    Языки общения и уровень
+                  </label>
+                  
+                  <div className="space-y-2">
+                    {spokenLanguages.map((lang, index) => {
+                      const langInfo = AVAILABLE_LANGS.find(l => l.code === lang.code);
+                      return (
+                        <div key={lang.code} className="flex items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-200">
+                          <span className="text-[13px] font-bold text-[#111] w-24">{langInfo?.name || lang.code}</span>
+                          <div className="flex gap-1">
+                            {[1, 2, 3, 4, 5].map(star => (
+                              <button
+                                key={star}
+                                onClick={() => {
+                                  const newLangs = [...spokenLanguages];
+                                  newLangs[index].level = star;
+                                  setSpokenLanguages(newLangs);
+                                }}
+                                className={`text-xl transition-transform hover:scale-110 ${star <= lang.level ? 'text-orange-400' : 'text-gray-300'}`}
+                              >
+                                ★
+                              </button>
+                            ))}
+                          </div>
+                          <button 
+                            onClick={() => setSpokenLanguages(spokenLanguages.filter(l => l.code !== lang.code))}
+                            className="text-gray-400 hover:text-red-500 transition-colors ml-4 cursor-pointer font-bold text-lg leading-none"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="flex gap-2 mt-1">
+                    <select 
+                      id="newLangSelect"
+                      defaultValue=""
+                      className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-[13px] font-bold outline-none focus:border-orange-400 cursor-pointer"
+                    >
+                      <option value="" disabled>Выберите язык...</option>
+                      {AVAILABLE_LANGS.filter(l => !spokenLanguages.find(sl => sl.code === l.code)).map(l => (
+                        <option key={l.code} value={l.code}>{l.name}</option>
+                      ))}
+                    </select>
+                    <button 
+                      onClick={() => {
+                        const select = document.getElementById('newLangSelect') as HTMLSelectElement;
+                        if (select.value) {
+                          setSpokenLanguages([...spokenLanguages, { code: select.value, level: 3 }]);
+                          select.value = ""; 
+                        }
+                      }}
+                      className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl font-bold text-[12px] transition-colors cursor-pointer"
+                    >
+                      + Добавить
+                    </button>
+                  </div>
+                </div>
+                {/* === КОНЕЦ БЛОКА ЯЗЫКОВ === */}
+
                 <div className="pt-3 border-t border-gray-100 mt-2 mb-2">
                   <label className="flex items-center gap-3 cursor-pointer group w-fit">
                     <input type="checkbox" checked={showOnline} onChange={toggleOnlineStatus} className="w-4 h-4 rounded border-gray-300 text-[#11a95e] focus:ring-[#11a95e]" />
@@ -1003,13 +1083,13 @@ export default function ProfilePage() {
                   onChange={e => setEditForm({...editForm, language: e.target.value})}
                 >
                   <option value="RU">Русский (RU)</option>
-<option value="EN">English (EN)</option>
-<option value="PL">Polski (PL)</option>
-<option value="DE">Deutsch (DE)</option>
-<option value="ES">Español (ES)</option>
-<option value="IT">Italiano (IT)</option>
-<option value="FR">Français (FR)</option>
-<option value="UA">Українська (UA)</option>
+                  <option value="EN">English (EN)</option>
+                  <option value="PL">Polski (PL)</option>
+                  <option value="DE">Deutsch (DE)</option>
+                  <option value="ES">Español (ES)</option>
+                  <option value="IT">Italiano (IT)</option>
+                  <option value="FR">Français (FR)</option>
+                  <option value="UA">Українська (UA)</option>
                 </select>
               </div>
               
@@ -1133,14 +1213,14 @@ export default function ProfilePage() {
                     value={taskForm.language || 'RU'} 
                     onChange={e => setTaskForm({...taskForm, language: e.target.value})}
                   >
-<option value="RU">Русский (RU)</option>
-<option value="EN">English (EN)</option>
-<option value="PL">Polski (PL)</option>
-<option value="DE">Deutsch (DE)</option>
-<option value="ES">Español (ES)</option>
-<option value="IT">Italiano (IT)</option>
-<option value="FR">Français (FR)</option>
-<option value="UA">Українська (UA)</option>
+                    <option value="RU">Русский (RU)</option>
+                    <option value="EN">English (EN)</option>
+                    <option value="PL">Polski (PL)</option>
+                    <option value="DE">Deutsch (DE)</option>
+                    <option value="ES">Español (ES)</option>
+                    <option value="IT">Italiano (IT)</option>
+                    <option value="FR">Français (FR)</option>
+                    <option value="UA">Українська (UA)</option>
                   </select>
                 </div>
               </div>
