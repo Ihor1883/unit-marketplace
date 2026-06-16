@@ -2,6 +2,66 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 
+// --- СЛОВАРЬ ИНТЕРФЕЙСА ПОМОЩНИКА (Вынесен наружу для оптимизации) ---
+const t: Record<string, any> = {
+  RU: {
+    title: "Помощник UNIT",
+    greeting: "Привет! Я виртуальный помощник UNIT. 🚀 Помогу найти специалиста, создать задание или разобраться в функциях. Какой у вас вопрос?",
+    placeholder: "Ваш вопрос...",
+    send: "Отправить",
+    thinking: "UNIT думает",
+    error: "Извините, сейчас я на техническом перерыве. Пожалуйста, повторите вопрос чуть позже."
+  },
+  EN: {
+    title: "UNIT Assistant",
+    greeting: "Hello! I am the UNIT virtual assistant. 🚀 I can help you find a specialist, create a task, or figure out the features. What is your question?",
+    placeholder: "Your question...",
+    send: "Send",
+    thinking: "UNIT is thinking",
+    error: "Sorry, I'm currently on a technical break. Please try again a bit later."
+  },
+  PL: {
+    title: "Asystent UNIT",
+    greeting: "Cześć! Jestem wirtualnym asystentem UNIT. 🚀 Pomogę Ci znaleźć specjalistę, utworzyć zadanie lub zrozumieć funkcje. Jakie masz pytanie?",
+    placeholder: "Twoje pytanie...",
+    send: "Wyślij",
+    thinking: "UNIT myśli",
+    error: "Przepraszam, mam obecnie przerwę techniczną. Spróbuj ponownie później."
+  },
+  DE: {
+    title: "UNIT Assistent",
+    greeting: "Hallo! Ich bin der virtuelle UNIT-Assistent. 🚀 Ich helfe bei der Suche nach Spezialisten oder beim Erstellen von Aufgaben. Was ist Ihre Frage?",
+    placeholder: "Ihre Frage...",
+    send: "Senden",
+    thinking: "UNIT denkt nach",
+    error: "Entschuldigung, ich bin gerade in einer technischen Pause. Bitte versuchen Sie es später noch einmal."
+  },
+  ES: {
+    title: "Asistente UNIT",
+    greeting: "¡Hola! Soy el asistente virtual de UNIT. 🚀 Puedo ayudarte a encontrar un especialista, crear una tarea o entender las funciones. ¿Cuál es tu pregunta?",
+    placeholder: "Tu pregunta...",
+    send: "Enviar",
+    thinking: "UNIT está pensando",
+    error: "Lo siento, estoy en una pausa técnica. Por favor, inténtalo de nuevo más tarde."
+  },
+  IT: {
+    title: "Assistente UNIT",
+    greeting: "Ciao! Sono l'assistente virtuale di UNIT. 🚀 Posso aiutarti a trovare uno specialista, creare un'attività o capire le funzioni. Qual è la tua domanda?",
+    placeholder: "La tua domanda...",
+    send: "Invia",
+    thinking: "UNIT sta pensando",
+    error: "Scusa, sono in pausa tecnica. Riprova più tardi."
+  },
+  FR: {
+    title: "Assistant UNIT",
+    greeting: "Bonjour ! Je suis l'assistant virtuel d'UNIT. 🚀 Je peux vous aider à trouver un spécialiste, créer une tâche ou comprendre les fonctionnalités. Quelle est votre question ?",
+    placeholder: "Votre question...",
+    send: "Envoyer",
+    thinking: "UNIT réfléchit",
+    error: "Désolé, je suis en pause technique. Veuillez réessayer plus tard."
+  }
+};
+
 export default function AIChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [lang, setLang] = useState('RU');
@@ -11,52 +71,32 @@ export default function AIChatWidget() {
   
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // --- СЛОВАРЬ ИНТЕРФЕЙСА ПОМОЩНИКА ---
-  const t: Record<string, any> = {
-    RU: {
-      title: "Помощник UNIT",
-      greeting: "Привет! Я виртуальный помощник UNIT. 🚀 Помогу найти специалиста, создать задание или разобраться в функциях. Какой у вас вопрос?",
-      placeholder: "Ваш вопрос...",
-      send: "Отправить",
-      thinking: "UNIT думает",
-      error: "Извините, сейчас я на техническом перерыве. Пожалуйста, повторите вопрос чуть позже."
-    },
-    EN: {
-      title: "UNIT Assistant",
-      greeting: "Hello! I am the UNIT virtual assistant. 🚀 I can help you find a specialist, create a task, or figure out the features. What is your question?",
-      placeholder: "Your question...",
-      send: "Send",
-      thinking: "UNIT is thinking",
-      error: "Sorry, I'm currently on a technical break. Please try again a bit later."
-    },
-    PL: {
-      title: "Asystent UNIT",
-      greeting: "Cześć! Jestem wirtualnym asystentem UNIT. 🚀 Pomogę Ci znaleźć specjalistę, utworzyć zadanie lub zrozumieć funkcje. Jakie masz pytanie?",
-      placeholder: "Twoje pytanie...",
-      send: "Wyślij",
-      thinking: "UNIT myśli",
-      error: "Przepraszam, mam obecnie przerwę techniczną. Spróbuj ponownie później."
-    },
-    DE: {
-      title: "UNIT Assistent",
-      greeting: "Hallo! Ich bin der virtuelle UNIT-Assistent. 🚀 Ich helfe bei der Suche nach Spezialisten oder beim Erstellen von Aufgaben. Was ist Ihre Frage?",
-      placeholder: "Ihre Frage...",
-      send: "Senden",
-      thinking: "UNIT denkt nach",
-      error: "Entschuldigung, ich bin gerade in einer technischen Pause. Bitte versuchen Sie es später noch einmal."
-    }
-  };
-
   const translate = (key: string) => (t[lang] && t[lang][key]) ? t[lang][key] : t['EN'][key] || key;
 
-  // Инициализация языка при загрузке
+  // Отслеживаем изменение языка в реальном времени
   useEffect(() => {
-    const savedLang = localStorage.getItem('unit_lang') || 'RU';
-    setLang(savedLang);
-    // Устанавливаем приветственное сообщение на нужном языке
-    setMessages([
-      { role: 'ai', text: (t[savedLang] ? t[savedLang].greeting : t['EN'].greeting) }
-    ]);
+    const checkLang = () => {
+      const savedLang = localStorage.getItem('unit_lang') || 'RU';
+      
+      setLang(prevLang => {
+        if (prevLang !== savedLang) {
+          // Если язык сменился, переводим самое первое приветственное сообщение
+          setMessages(prev => {
+            if (prev.length <= 1) { // Меняем только если юзер еще не начал диалог
+              return [{ role: 'ai', text: t[savedLang]?.greeting || t['EN'].greeting }];
+            }
+            return prev;
+          });
+          return savedLang;
+        }
+        return prevLang;
+      });
+    };
+
+    checkLang(); // Запуск при загрузке
+    const interval = setInterval(checkLang, 500); // Проверка каждые полсекунды
+    
+    return () => clearInterval(interval);
   }, []);
 
   // Слушаем команду на открытие чата из любой точки сайта
@@ -77,16 +117,16 @@ export default function AIChatWidget() {
     
     const userMsg = input.trim();
     
-    // Показываем в UI чистое сообщение пользователя
     setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
     setInput('');
     setIsTyping(true);
 
-    // Подсказка для ИИ: на каком языке отвечать
-    const langNames: Record<string, string> = { RU: "Russian", EN: "English", PL: "Polish", DE: "German" };
+    const langNames: Record<string, string> = { 
+      RU: "Russian", EN: "English", PL: "Polish", DE: "German", 
+      ES: "Spanish", IT: "Italian", FR: "French" 
+    };
     const targetLangName = langNames[lang] || "English";
     
-    // НЕВИДИМАЯ КОМАНДА: Приклеиваем системную инструкцию к сообщению перед отправкой на сервер
     const apiPrompt = `[System instruction: You are a helpful assistant for the UNIT Marketplace. Reply strictly in ${targetLangName} language]. User asks: ${userMsg}`;
 
     try {
@@ -97,7 +137,6 @@ export default function AIChatWidget() {
           'apikey': 'sb_publishable_T3mXpJUgZmPr7cwJcLPohA_0JsjIrAO',
           'Authorization': 'Bearer sb_publishable_T3mXpJUgZmPr7cwJcLPohA_0JsjIrAO'
         },
-        // Отправляем модифицированное сообщение с командой
         body: JSON.stringify({ message: apiPrompt, language: lang }),
       });
 
