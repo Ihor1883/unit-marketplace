@@ -12,6 +12,7 @@ export default function ServiceClient() {
   
   const [user, setUser] = useState<any>(null);
   const [service, setService] = useState<any>(null);
+  const [sellerProfile, setSellerProfile] = useState<any>(null); // НОВЫЙ СТЕЙТ ДЛЯ ПРОФИЛЯ ПРОДАВЦА
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOrdering, setIsOrdering] = useState(false);
@@ -28,16 +29,19 @@ export default function ServiceClient() {
   // --- СЛОВАРЬ (ПОЛНЫЙ) ---
   const t: Record<string, any> = {
     RU: {
-      loading_service: "Загрузка услуги...", service_not_found: "Услуга не найдена :(", back_to_main: "Вернуться на главную", back_to_list: "Вернуться к списку", category_label: "Рубрика", about_service: "Об услуге", customer_reviews: "Отзывы покупателей", rate_seller: "Оцените работу продавца:", review_placeholder: "Расскажите, как прошло сотрудничество...", submitting: "Отправка...", publish_review: "Опубликовать отзыв", login_to_review: "Войдите в аккаунт, чтобы оставить отзыв об этой услуге.", no_reviews_yet: "Пока нет ни одного отзыва. Станьте первым!", quality_guarantee: "Гарантия качества", direct_communication: "Связь напрямую с исполнителем", post_support: "Поддержка после сдачи", order_for: "Заказать за", safe_deal: "Безопасная сделка", reviews_count_text: "отзывов", created_services: "Создано услуг", successfully_delivered: "Успешно сдано", alert_login_review: "Пожалуйста, войдите в аккаунт на главной странице, чтобы оставить отзыв.", alert_empty_review: "Пожалуйста, напишите текст отзыва.", alert_review_success: "Отзыв успешно опубликован!", alert_review_error: "Ошибка при отправке: ", alert_login_order: "Для заказа войдите в аккаунт на главной странице!", order_success: "Заказ успешно оформлен! Вы можете отслеживать его в 'Мои заказы'.",
-      cat_design: "Дизайн", cat_dev: "Разработка и IT", cat_text: "Тексты и переводы", cat_seo: "SEO и трафик", cat_social: "Соцсети и маркетинг", cat_audio: "Аудио, видео, съемка", cat_bus: "Бизнес и жизнь", delivery_time: "Срок: 1-3 дня", seller: "Продавец"
+      loading_service: "Загрузка услуги...", service_not_found: "Услуга не найдена :(", back_to_main: "Вернуться на главную", back_to_list: "Вернуться к списку", category_label: "Рубрика", about_service: "Об услуге", customer_reviews: "Отзывы покупателей", rate_seller: "Оцените работу продавца:", review_placeholder: "Расскажите, как прошло сотрудничество...", submitting: "Отправка...", publish_review: "Опубликовать отзыв", login_to_review: "Войдите в аккаунт, чтобы оставить отзыв об этой услуге.", no_reviews_yet: "Пока нет ни одного отзыва. Станьте первым!", quality_guarantee: "Гарантия качества", direct_communication: "Связь напрямую с исполнителем", post_support: "Поддержка после сдачи", order_for: "Заказать за", order_now: "Заказать сейчас", safe_deal: "Безопасная сделка", reviews_count_text: "отзывов", created_services: "Создано услуг", successfully_delivered: "Успешно сдано", alert_login_review: "Пожалуйста, войдите в аккаунт на главной странице, чтобы оставить отзыв.", alert_empty_review: "Пожалуйста, напишите текст отзыва.", alert_review_success: "Отзыв успешно опубликован!", alert_review_error: "Ошибка при отправке: ", alert_login_order: "Для заказа войдите в аккаунт на главной странице!", order_success: "Заказ успешно оформлен! Вы можете отслеживать его в 'Мои заказы'.",
+      cat_design: "Дизайн", cat_dev: "Разработка и IT", cat_text: "Тексты и переводы", cat_seo: "SEO и трафик", cat_social: "Соцсети и маркетинг", cat_audio: "Аудио, видео, съемка", cat_bus: "Бизнес и жизнь", delivery_time: "Срок: 1-3 дня", seller: "Продавец",
+      languages_spoken: "Языки общения" // ПЕРЕВОД ДЛЯ БЛОКА ЯЗЫКОВ
     },
     EN: {
-      loading_service: "Loading service...", service_not_found: "Service not found :(", back_to_main: "Back to home", back_to_list: "Back to list", category_label: "Category", about_service: "About the service", customer_reviews: "Customer reviews", rate_seller: "Rate the seller:", review_placeholder: "Tell us how the cooperation went...", submitting: "Submitting...", publish_review: "Publish review", login_to_review: "Log in to leave a review for this service.", no_reviews_yet: "No reviews yet. Be the first!", quality_guarantee: "Quality guarantee", direct_communication: "Direct communication with the seller", post_support: "Post-delivery support", order_for: "Order for", safe_deal: "Safe deal", reviews_count_text: "reviews", created_services: "Services created", successfully_delivered: "Success rate", alert_login_review: "Please log in on the main page to leave a review.", alert_empty_review: "Please write a review text.", alert_review_success: "Review published successfully!", alert_review_error: "Error submitting: ", alert_login_order: "Log in on the main page to order!", order_success: "Order placed successfully! Track it in 'My Orders'.",
-      cat_design: "Design", cat_dev: "Development & IT", cat_text: "Texts & Translation", cat_seo: "SEO & Traffic", cat_social: "Social Media", cat_audio: "Audio & Video", cat_bus: "Business & Life", delivery_time: "Time: 1-3 days", seller: "Seller"
+      loading_service: "Loading service...", service_not_found: "Service not found :(", back_to_main: "Back to home", back_to_list: "Back to list", category_label: "Category", about_service: "About the service", customer_reviews: "Customer reviews", rate_seller: "Rate the seller:", review_placeholder: "Tell us how the cooperation went...", submitting: "Submitting...", publish_review: "Publish review", login_to_review: "Log in to leave a review for this service.", no_reviews_yet: "No reviews yet. Be the first!", quality_guarantee: "Quality guarantee", direct_communication: "Direct communication with the seller", post_support: "Post-delivery support", order_for: "Order for", order_now: "Order now", safe_deal: "Safe deal", reviews_count_text: "reviews", created_services: "Services created", successfully_delivered: "Success rate", alert_login_review: "Please log in on the main page to leave a review.", alert_empty_review: "Please write a review text.", alert_review_success: "Review published successfully!", alert_review_error: "Error submitting: ", alert_login_order: "Log in on the main page to order!", order_success: "Order placed successfully! Track it in 'My Orders'.",
+      cat_design: "Design", cat_dev: "Development & IT", cat_text: "Texts & Translation", cat_seo: "SEO & Traffic", cat_social: "Social Media", cat_audio: "Audio & Video", cat_bus: "Business & Life", delivery_time: "Time: 1-3 days", seller: "Seller",
+      languages_spoken: "Languages"
     },
     PL: {
-      loading_service: "Ładowanie usługi...", service_not_found: "Nie znaleziono usługi :(", back_to_main: "Strona główna", back_to_list: "Wróć do listy", category_label: "Kategoria", about_service: "O usłudze", customer_reviews: "Opinie", rate_seller: "Oceń sprzedawcę:", review_placeholder: "Powiedz, jak przebiegła współpraca...", submitting: "Wysyłanie...", publish_review: "Opublikuj opinię", login_to_review: "Zaloguj się, aby zostawić opinię.", no_reviews_yet: "Brak opinii. Bądź pierwszy!", quality_guarantee: "Gwarancja jakości", direct_communication: "Bezpośredni kontakt", post_support: "Wsparcie po dostawie", order_for: "Zamów za", safe_deal: "Bezpieczna transakcja", reviews_count_text: "opinii", created_services: "Utworzone usługi", successfully_delivered: "Sukces", alert_login_review: "Zaloguj się, aby dodać opinię.", alert_empty_review: "Proszę napisać tekst opinii.", alert_review_success: "Opinia pomyślnie opublikowana!", alert_review_error: "Błąd wysyłania: ", alert_login_order: "Zaloguj się, aby zamówić!", order_success: "Zamówienie złożone pomyślnie! Śledź je w swoim profilu.",
-      cat_design: "Design", cat_dev: "Programowanie i IT", cat_text: "Teksty i Tłumaczenia", cat_seo: "SEO i Ruch", cat_social: "Media", cat_audio: "Audio i Wideo", cat_bus: "Biznes", delivery_time: "Czas: 1-3 dni", seller: "Sprzedawca"
+      loading_service: "Ładowanie usługi...", service_not_found: "Nie znaleziono usługi :(", back_to_main: "Strona główna", back_to_list: "Wróć do listy", category_label: "Kategoria", about_service: "O usłudze", customer_reviews: "Opinie", rate_seller: "Oceń sprzedawcę:", review_placeholder: "Powiedz, jak przebiegła współpraca...", submitting: "Wysyłanie...", publish_review: "Opublikuj opinię", login_to_review: "Zaloguj się, aby zostawić opinię.", no_reviews_yet: "Brak opinii. Bądź pierwszy!", quality_guarantee: "Gwarancja jakości", direct_communication: "Bezpośredni kontakt", post_support: "Wsparcie po dostawie", order_for: "Zamów za", order_now: "Zamów teraz", safe_deal: "Bezpieczna transakcja", reviews_count_text: "opinii", created_services: "Utworzone usługi", successfully_delivered: "Sukces", alert_login_review: "Zaloguj się, aby dodać opinię.", alert_empty_review: "Proszę napisać tekst opinii.", alert_review_success: "Opinia pomyślnie opublikowana!", alert_review_error: "Błąd wysyłania: ", alert_login_order: "Zaloguj się, aby zamówić!", order_success: "Zamówienie złożone pomyślnie! Śledź je w swoim profilu.",
+      cat_design: "Design", cat_dev: "Programowanie i IT", cat_text: "Teksty i Tłumaczenia", cat_seo: "SEO i Ruch", cat_social: "Media", cat_audio: "Audio i Wideo", cat_bus: "Biznes", delivery_time: "Czas: 1-3 dni", seller: "Sprzedawca",
+      languages_spoken: "Języki komunikacji"
     }
   };
 
@@ -79,6 +83,13 @@ export default function ServiceClient() {
         const { data: srvData } = await supabase.from('services').select('*').eq('id', params.id).maybeSingle(); 
         if (isMounted && srvData) {
           setService(srvData);
+
+          // ПОДТЯГИВАЕМ ПРОФИЛЬ ПРОДАВЦА ДЛЯ ПОЛУЧЕНИЯ ЯЗЫКОВ
+          if (srvData.user_id) {
+            const { data: profData } = await supabase.from('profiles').select('*').eq('id', srvData.user_id).maybeSingle();
+            if (isMounted && profData) setSellerProfile(profData);
+          }
+
           const { data: revData } = await supabase.from('reviews').select('*').eq('service_id', params.id).order('created_at', { ascending: false });
           if (isMounted && revData) setReviews(revData);
         }
@@ -185,10 +196,10 @@ export default function ServiceClient() {
 
         <div className="flex flex-col lg:flex-row gap-6 items-start">
           
-          {/* ЛЕВАЯ ЧАСТЬ (Основной контент - Компактный) */}
+          {/* ЛЕВАЯ ЧАСТЬ (Основной контент) */}
           <div className="flex-1 w-full space-y-6">
             
-            {/* СЖАТАЯ ОБЛОЖКА */}
+            {/* ОБЛОЖКА */}
             <div className="w-full h-[240px] sm:h-[340px] bg-gray-100 rounded-2xl overflow-hidden shadow-sm relative border border-gray-100 group">
               {service.image_url ? (
                 <img src={service.image_url} alt={service.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" />
@@ -273,7 +284,7 @@ export default function ServiceClient() {
             </div>
           </div>
 
-          {/* ПРАВАЯ ЧАСТЬ (Сжатый аккуратный Sidebar) */}
+          {/* ПРАВАЯ ЧАСТЬ (Sidebar) */}
           <aside className="w-full lg:w-[320px] shrink-0 space-y-5 lg:sticky lg:top-[84px] relative z-20">
             
             {/* БЛОК ЦЕНЫ И ЗАКАЗА */}
@@ -341,6 +352,36 @@ export default function ServiceClient() {
                  <span className="text-gray-300 font-normal">|</span> 
                  <span className="text-gray-500 font-medium">{service.reviews_count || 0} {translate('reviews_count_text')}</span>
                </div>
+
+               {/* === НОВЫЙ КРАСИВЫЙ БЛОК ВЫВОДА ЯЗЫКОВ ПРОДАВЦА === */}
+               {sellerProfile?.spoken_languages && sellerProfile.spoken_languages.length > 0 && (
+                 <div className="mb-4 border-t border-gray-50 pt-4 w-full">
+                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-1">
+                     <svg className="w-3.5 h-3.5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                     </svg>
+                     {translate('languages_spoken')}
+                   </p>
+                   <div className="space-y-1.5">
+                     {sellerProfile.spoken_languages.map((lang: any) => (
+                       <div key={lang.code} className="flex items-center justify-between text-[13px] bg-gray-50/60 px-3 py-1.5 rounded-xl border border-gray-100 text-[12px]">
+                         <span className="font-black text-gray-700 tracking-wide uppercase">{lang.code}</span>
+                         <div className="flex gap-0.5">
+                           {[1, 2, 3, 4, 5].map(star => (
+                             <span 
+                               key={star} 
+                               className={`text-base leading-none ${star <= lang.level ? 'text-orange-400' : 'text-gray-200'}`}
+                             >
+                               ★
+                             </span>
+                           ))}
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                 </div>
+               )}
+               {/* === КОНЕЦ БЛОКА ЯЗЫКОВ === */}
 
                <div className="grid grid-cols-2 gap-2 border-t border-gray-50 pt-4">
                   <div className="bg-gray-50 p-2.5 rounded-xl text-center border border-gray-100">
