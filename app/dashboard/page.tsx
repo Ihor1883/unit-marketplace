@@ -9,8 +9,9 @@ export default function AdminDashboard() {
   const router = useRouter();
 
   const [paymentEnabled, setPaymentEnabled] = useState(false);
-  const [defaultLang, setDefaultLang] = useState('RU');
   const [loadingToggle, setLoadingToggle] = useState(false);
+  
+  // Язык интерфейса самой админки (подхватывается из локальной памяти браузера)
   const [uiLang, setUiLang] = useState('EN'); 
 
   const [allOrders, setAllOrders] = useState<any[]>([]);
@@ -25,13 +26,13 @@ export default function AdminDashboard() {
   const [openChatId, setOpenChatId] = useState<string | null>(null);
   const [currency, setCurrency] = useState('PLN');
 
+  // Локальные переводы для админ-панели
   const t: Record<string, any> = {
     RU: {
       back: "Вернуться на сайт →", pay_title: "Прием платежей (Stripe)",
       pay_on: "Платежная система включена. Пользователи оплачивают заказ картой.",
       pay_off: "Тестовый режим. Пользователи создают заказы бесплатно.",
       btn_off: "ВЫКЛЮЧИТЬ ОПЛАТУ", btn_on: "АКТИВИРОВАТЬ ОПЛАТУ", processing: "ОБРАБОТКА...",
-      lang_title: "Язык по умолчанию", lang_desc: "Этот язык увидят новые пользователи.",
       ads_title: "Рекламные баннеры", ads_desc: "Управляйте рекламой на главной странице.",
       img_url: "URL картинки (https://...)", link_url: "Ссылка для перехода (https://...)",
       add: "Добавить", delete: "Удалить", no_ads: "Рекламных баннеров пока нет.",
@@ -47,7 +48,6 @@ export default function AdminDashboard() {
       pay_on: "Payments enabled. Users pay by card.",
       pay_off: "Test mode. Users create orders for free.",
       btn_off: "DISABLE PAYMENTS", btn_on: "ACTIVATE PAYMENTS", processing: "PROCESSING...",
-      lang_title: "Default Language", lang_desc: "New users will see this language.",
       ads_title: "Ad Banners", ads_desc: "Manage ads on the main page.",
       img_url: "Image URL (https://...)", link_url: "Redirect Link (https://...)",
       add: "Add", delete: "Delete", no_ads: "No ad banners yet.",
@@ -63,7 +63,6 @@ export default function AdminDashboard() {
       pay_on: "Płatności włączone. Użytkownicy płacą kartą.",
       pay_off: "Tryb testowy. Użytkownicy tworzą zamówienia za darmo.",
       btn_off: "WYŁĄCZ PŁATNOŚCI", btn_on: "AKTYWUJ PŁATNOŚCI", processing: "PRZETWARZANIE...",
-      lang_title: "Domyślny język", lang_desc: "Nowi użytkownicy zobaczą ten język.",
       ads_title: "Banery reklamowe", ads_desc: "Zarządzaj reklamami na stronie głównej.",
       img_url: "URL obrazka (https://...)", link_url: "Link (https://...)",
       add: "Dodaj", delete: "Usuń", no_ads: "Brak banerów reklamowych.",
@@ -78,7 +77,6 @@ export default function AdminDashboard() {
       back: "Zurück zur Seite →", pay_title: "Stripe-Zahlungen",
       pay_on: "Zahlungen aktiviert.", pay_off: "Testmodus. Kostenlos.",
       btn_off: "DEAKTIVIEREN", btn_on: "AKTIVIEREN", processing: "VERARBEITUNG...",
-      lang_title: "Standardsprache", lang_desc: "Neue Benutzer sehen diese Sprache.",
       ads_title: "Werbebanner", ads_desc: "Verwalten Sie Anzeigen.",
       img_url: "Bild-URL", link_url: "Weiterleitungslink",
       add: "Hinzufügen", delete: "Löschen", no_ads: "Noch keine Banner.",
@@ -93,7 +91,6 @@ export default function AdminDashboard() {
       back: "Volver al sitio →", pay_title: "Pagos de Stripe",
       pay_on: "Pagos activados.", pay_off: "Modo de prueba. Gratis.",
       btn_off: "DESACTIVAR", btn_on: "ACTIVAR", processing: "PROCESANDO...",
-      lang_title: "Idioma predeterminado", lang_desc: "Los nuevos usuarios verán esto.",
       ads_title: "Banners de anuncios", ads_desc: "Administrar anuncios.",
       img_url: "URL de la imagen", link_url: "Enlace",
       add: "Agregar", delete: "Eliminar", no_ads: "Aún no hay anuncios.",
@@ -108,7 +105,6 @@ export default function AdminDashboard() {
       back: "Torna al sito →", pay_title: "Pagamenti Stripe",
       pay_on: "Pagamenti attivati.", pay_off: "Modalità test. Gratis.",
       btn_off: "DISATTIVA", btn_on: "ATTIVA", processing: "ELABORAZIONE...",
-      lang_title: "Lingua predefinita", lang_desc: "I nuovi utenti vedranno questo.",
       ads_title: "Banner pubblicitari", ads_desc: "Gestisci annunci.",
       img_url: "URL immagine", link_url: "Link",
       add: "Aggiungi", delete: "Elimina", no_ads: "Nessun annuncio ancora.",
@@ -123,7 +119,6 @@ export default function AdminDashboard() {
       back: "Retour au site →", pay_title: "Paiements Stripe",
       pay_on: "Paiements activés.", pay_off: "Mode test. Gratuit.",
       btn_off: "DÉSACTIVER", btn_on: "ACTIVER", processing: "TRAITEMENT...",
-      lang_title: "Langue par défaut", lang_desc: "Les nouveaux verront ceci.",
       ads_title: "Bannières publicitaires", ads_desc: "Gérer les annonces.",
       img_url: "URL de l'image", link_url: "Lien",
       add: "Ajouter", delete: "Supprimer", no_ads: "Pas encore d'annonces.",
@@ -131,7 +126,7 @@ export default function AdminDashboard() {
       forgive: "Pardonner", ban_acc: "Bannir le compte", ord_mgmt: "Gestion des commandes",
       th_id: "ID / Date", th_serv: "Service / Vendeur", th_buyer: "Acheteur", th_status: "Statut", th_act: "Action",
       no_ord: "Aucune commande", chat: "Chat", card_mgmt: "Gestion des services",
-      th_photo: "Photo", th_name: "Titre", th_seller: "Vendeur", th_manage: "Gérer",
+      th_photo: "Foto", th_name: "Titre", th_seller: "Vendeur", th_manage: "Gérer",
       top_add: "🚀 À TOP", top_rem: "⭐ Retirer", users: "Utilisateurs", blocked: "Banni"
     }
   };
@@ -143,6 +138,7 @@ export default function AdminDashboard() {
     const fetchData = async () => {
       setLoadingData(true);
       
+      // Автоматическое применение языка админки из памяти
       const savedLang = localStorage.getItem('unit_lang') || 'EN';
       if (isMounted) setUiLang(savedLang);
 
@@ -161,9 +157,7 @@ export default function AdminDashboard() {
       if (isMounted) {
         if (settingsRes.data) {
           const paymentSetting = settingsRes.data.find(s => s.key === 'payment_enabled');
-          const langSetting = settingsRes.data.find(s => s.key === 'default_lang');
           if (paymentSetting) setPaymentEnabled(paymentSetting.value === 'true');
-          if (langSetting) setDefaultLang(langSetting.value);
         }
 
         if (ordersRes.data) setAllOrders(ordersRes.data);
@@ -179,14 +173,6 @@ export default function AdminDashboard() {
     fetchData();
     return () => { isMounted = false; };
   }, []);
-
-  const updateDefaultLang = async (val: string) => {
-    const { error } = await supabase.from('settings').upsert({ key: 'default_lang', value: val });
-    if (!error) {
-      setDefaultLang(val);
-      alert(`Default language changed to ${val}`);
-    }
-  };
 
   const togglePayment = async () => {
     setLoadingToggle(true);
@@ -227,7 +213,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // ИСПРАВЛЕНА ФУНКЦИЯ ДОБАВЛЕНИЯ В ТОП
   const toggleTopStatus = async (id: string, currentStatus: boolean) => {
     const newStatus = !currentStatus;
     const { error } = await supabase.from('services').update({ is_top: newStatus }).eq('id', id);
@@ -239,7 +224,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // ИСПРАВЛЕНА ФУНКЦИЯ БАНА
   const handleBanUser = async (userId: string, userEmail: string, violationId?: string) => {
     if (!confirm(`Заблокировать аккаунт ${userEmail}?`)) return;
     const { error } = await supabase.from('profiles').update({ is_banned: true }).eq('id', userId);
@@ -255,7 +239,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // ИСПРАВЛЕНА ФУНКЦИЯ РАЗБАНА
   const handleUnbanUser = async (userId: string, userEmail: string) => {
     if (!confirm(`Разблокировать аккаунт ${userEmail}?`)) return;
     const { error } = await supabase.from('profiles').update({ is_banned: false }).eq('id', userId);
@@ -307,52 +290,31 @@ export default function AdminDashboard() {
 
       <main className="max-w-[1240px] mx-auto px-4 py-6">
         
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6 flex flex-col lg:flex-row gap-6 items-center relative overflow-hidden">
+        {/* ПАНЕЛЬ УПРАВЛЕНИЯ ПЛАТЕЖАМИ */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6 flex flex-col md:flex-row gap-6 items-center justify-between relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-gray-50 rounded-full -mr-20 -mt-20 blur-3xl pointer-events-none"></div>
 
-          <div className="flex-1 w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
-            <div>
-              <h2 className="text-[18px] font-black text-[#111] mb-0.5">{translate('pay_title')}</h2>
-              <p className="text-[13px] text-gray-400 font-medium">
-                {paymentEnabled ? translate('pay_on') : translate('pay_off')}
-              </p>
-            </div>
-            <button 
-              onClick={togglePayment} 
-              disabled={loadingToggle} 
-              className={`shrink-0 px-6 py-2.5 rounded-xl font-black text-[12px] tracking-wide uppercase transition-all shadow-sm disabled:opacity-50 cursor-pointer ${
-                paymentEnabled 
-                  ? 'bg-gradient-to-r from-red-500 to-rose-600 text-white' 
-                  : 'bg-gradient-to-r from-[#11a95e] to-emerald-500 text-white'
-              }`}
-            >
-              {loadingToggle ? translate('processing') : (paymentEnabled ? translate('btn_off') : translate('btn_on'))}
-            </button>
+          <div className="flex flex-col relative z-10 w-full md:w-auto text-center md:text-left">
+            <h2 className="text-[20px] font-black text-[#111] mb-1">{translate('pay_title')}</h2>
+            <p className="text-[14px] text-gray-500 font-medium max-w-md">
+              {paymentEnabled ? translate('pay_on') : translate('pay_off')}
+            </p>
           </div>
-
-          <div className="w-full lg:w-px lg:h-14 bg-gray-100 relative z-10 hidden lg:block"></div>
-
-          <div className="flex-1 w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
-            <div>
-              <h2 className="text-[18px] font-black text-[#111] mb-0.5">{translate('lang_title')}</h2>
-              <p className="text-[13px] text-gray-400 font-medium">{translate('lang_desc')}</p>
-            </div>
-            <select 
-              value={defaultLang} 
-              onChange={(e) => updateDefaultLang(e.target.value)}
-              className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-[13px] font-bold outline-none focus:border-orange-400 focus:bg-white transition-all shrink-0 cursor-pointer"
-            >
-              <option value="RU">Русский (RU)</option>
-              <option value="EN">English (EN)</option>
-              <option value="PL">Polski (PL)</option>
-              <option value="DE">Deutsch (DE)</option>
-              <option value="ES">Español (ES)</option>
-              <option value="IT">Italiano (IT)</option>
-              <option value="FR">Français (FR)</option>
-            </select>
-          </div>
+          
+          <button 
+            onClick={togglePayment} 
+            disabled={loadingToggle} 
+            className={`relative z-10 w-full md:w-auto shrink-0 px-8 py-3.5 rounded-xl font-black text-[13px] tracking-wide uppercase transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 cursor-pointer ${
+              paymentEnabled 
+                ? 'bg-gradient-to-r from-red-500 to-rose-600 text-white' 
+                : 'bg-gradient-to-r from-[#11a95e] to-emerald-500 text-white'
+            }`}
+          >
+            {loadingToggle ? translate('processing') : (paymentEnabled ? translate('btn_off') : translate('btn_on'))}
+          </button>
         </div>
 
+        {/* УПРАВЛЕНИЕ РЕКЛАМОЙ */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
           <h2 className="text-[18px] font-black text-[#111] mb-1">{translate('ads_title')}</h2>
           <p className="text-[13px] text-gray-400 font-medium mb-4">{translate('ads_desc')}</p>
@@ -403,6 +365,7 @@ export default function AdminDashboard() {
           )}
         </div>
 
+        {/* СТАТИСТИКА */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="bg-gradient-to-br from-orange-500/5 to-transparent rounded-2xl border border-orange-500/10 px-6 py-4 flex items-center justify-between shadow-sm">
             <div>
@@ -420,6 +383,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        {/* ЖАЛОБЫ И МОДЕРАЦИЯ */}
         {violations.length > 0 && (
           <div className="bg-gradient-to-r from-red-50 to-white rounded-2xl shadow-sm border border-red-200 p-6 mb-6">
             <h2 className="text-[18px] font-black text-red-600 mb-4 flex items-center gap-2">
@@ -435,10 +399,10 @@ export default function AdminDashboard() {
                     <div className="text-[13px] text-gray-700 italic bg-gray-50 p-3 rounded-lg border border-gray-100">"{v.message}"</div>
                   </div>
                   <div className="flex gap-2 shrink-0">
-                    <button onClick={() => handleDismissViolation(v.id)} className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-[12px] font-bold cursor-pointer">
+                    <button onClick={() => handleDismissViolation(v.id)} className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-[12px] font-bold cursor-pointer hover:bg-gray-200">
                       {translate('forgive')}
                     </button>
-                    <button onClick={() => handleBanUser(v.user_id, v.user_email, v.id)} className="px-4 py-2 bg-red-500 text-white rounded-lg text-[12px] font-bold cursor-pointer">
+                    <button onClick={() => handleBanUser(v.user_id, v.user_email, v.id)} className="px-4 py-2 bg-red-500 hover:bg-red-600 transition-colors text-white rounded-lg text-[12px] font-bold cursor-pointer">
                       {translate('ban_acc')}
                     </button>
                   </div>
@@ -448,6 +412,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {/* ТАБЛИЦА ЗАКАЗОВ */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
             <h3 className="font-black text-[15px] text-[#111]">{translate('ord_mgmt')}</h3>
@@ -509,7 +474,6 @@ export default function AdminDashboard() {
                           <td colSpan={5} className="p-0 border-b border-gray-100 bg-gray-50/50">
                             <div className="p-4">
                               <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm max-w-4xl mx-auto">
-                                {/* ПЕРЕДАЕМ ПРАВИЛЬНЫЙ ЯЗЫК В ЧАТ */}
                                 <Chat orderId={order.id} userEmail="Admin" lang={uiLang} />
                               </div>
                             </div>
@@ -524,7 +488,9 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        {/* УПРАВЛЕНИЕ КАРТОЧКАМИ И ПОЛЬЗОВАТЕЛЯМИ */}
         <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
+          
           <div className="lg:col-span-2 xl:col-span-3 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
             <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0">
               <h3 className="font-black text-[15px] text-[#111]">{translate('card_mgmt')}</h3>
@@ -577,14 +543,14 @@ export default function AdminDashboard() {
           <div className="lg:col-span-1 xl:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col max-h-[600px]">
              <div className="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0">
                 <h3 className="font-black text-[15px] text-[#111]">{translate('users')}</h3>
-                <span className="bg-white border text-gray-600 text-[10px] font-black px-2.5 py-0.5 rounded-full">{profiles.length}</span>
+                <span className="bg-white border text-gray-600 text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-sm">{profiles.length}</span>
              </div>
              <div className="overflow-y-auto flex-1 p-3 space-y-2">
                 {profiles.map(p => {
                   const displayName = p.full_name || p.email || 'Аноним';
                   return (
                     <div key={p.id} className={`flex items-center gap-3 p-2 rounded-xl transition-colors hover:bg-gray-50 ${p.is_banned ? 'bg-red-50/30' : ''}`}>
-                      <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-[12px] font-black text-gray-600">
+                      <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-[12px] font-black text-gray-600 shrink-0">
                         {displayName[0].toUpperCase()}
                       </div>
                       <div className="text-[12px] font-bold text-gray-700 flex-1 min-w-0">
@@ -592,14 +558,14 @@ export default function AdminDashboard() {
                         {p.is_banned ? (
                           <span className="text-red-500 text-[9px] uppercase font-black">{translate('blocked')}</span>
                         ) : (
-                          <span className="text-gray-400 text-[10px] block">{p.email}</span>
+                          <span className="text-gray-400 text-[10px] block truncate">{p.email}</span>
                         )}
                       </div>
                       <div className="shrink-0">
                         {p.is_banned ? (
-                          <button onClick={() => handleUnbanUser(p.id, displayName)} className="w-7 h-7 flex items-center justify-center rounded-lg bg-white border border-green-200 text-green-600 cursor-pointer">✓</button>
+                          <button onClick={() => handleUnbanUser(p.id, displayName)} className="w-7 h-7 flex items-center justify-center rounded-lg bg-white border border-green-200 text-green-600 cursor-pointer shadow-sm hover:bg-green-50 transition-colors">✓</button>
                         ) : (
-                          <button onClick={() => handleBanUser(p.id, displayName)} className="w-7 h-7 flex items-center justify-center rounded-lg bg-white border text-gray-400 hover:text-red-500 cursor-pointer">✕</button>
+                          <button onClick={() => handleBanUser(p.id, displayName)} className="w-7 h-7 flex items-center justify-center rounded-lg bg-white border text-gray-400 hover:text-red-500 cursor-pointer shadow-sm hover:bg-red-50 transition-colors">✕</button>
                         )}
                       </div>
                     </div>

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { supabase } from '../../supabase';
 
-// Описываем типы пропсов
 interface Category {
   id: string;
   titleKey: string;
@@ -21,8 +20,8 @@ export default function CreateTaskModal({ isOpen, onClose, userEmail, categories
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [budget, setBudget] = useState('');
-  // Берем первую категорию по умолчанию (пропуская 'ALL')
   const [category, setCategory] = useState(categories.find(c => c.id !== 'ALL')?.id || 'OTHER'); 
+  const [language, setLanguage] = useState('RU'); // Стейт для языка
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
@@ -37,13 +36,13 @@ export default function CreateTaskModal({ isOpen, onClose, userEmail, categories
 
     setIsSubmitting(true);
 
-    // Отправляем данные в таблицу tasks
     const { error } = await supabase.from('tasks').insert([
       {
         title,
         description,
         budget: Number(budget),
         category,
+        language, // Отправляем язык в базу
         client_email: userEmail,
         status: 'Open'
       }
@@ -58,8 +57,8 @@ export default function CreateTaskModal({ isOpen, onClose, userEmail, categories
       setTitle('');
       setDescription('');
       setBudget('');
+      setLanguage('RU');
       onClose();
-      // Перезагружаем страницу, чтобы подтянуть новые задания из базы
       window.location.reload(); 
     }
   };
@@ -97,7 +96,7 @@ export default function CreateTaskModal({ isOpen, onClose, userEmail, categories
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-[13px] font-bold text-gray-700 mb-1.5">Бюджет</label>
               <input 
@@ -118,10 +117,25 @@ export default function CreateTaskModal({ isOpen, onClose, userEmail, categories
                 className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[14px] outline-none focus:border-[#11a95e] focus:bg-white transition-all cursor-pointer font-bold text-gray-700"
               >
                 {categories.filter(c => c.id !== 'ALL').map(cat => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.id}
-                  </option>
+                  <option key={cat.id} value={cat.id}>{cat.id}</option>
                 ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-[13px] font-bold text-gray-700 mb-1.5">Язык</label>
+              <select 
+                value={language} 
+                onChange={(e) => setLanguage(e.target.value)}
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[14px] outline-none focus:border-[#11a95e] focus:bg-white transition-all cursor-pointer font-bold text-gray-700"
+              >
+                <option value="RU">🇷🇺 RU</option>
+                <option value="EN">🇬🇧 EN</option>
+                <option value="PL">🇵🇱 PL</option>
+                <option value="DE">🇩🇪 DE</option>
+                <option value="ES">🇪🇸 ES</option>
+                <option value="IT">🇮🇹 IT</option>
+                <option value="FR">🇫🇷 FR</option>
+                <option value="UA">🇺🇦 UA</option>
               </select>
             </div>
           </div>
@@ -130,14 +144,14 @@ export default function CreateTaskModal({ isOpen, onClose, userEmail, categories
             <button 
               type="button" 
               onClick={onClose}
-              className="px-6 py-3 rounded-xl font-bold text-[13px] text-gray-500 hover:bg-gray-100 transition-colors"
+              className="px-6 py-3 rounded-xl font-bold text-[13px] text-gray-500 hover:bg-gray-100 transition-colors cursor-pointer"
             >
               Отмена
             </button>
             <button 
               type="submit" 
               disabled={isSubmitting}
-              className="bg-gradient-to-r from-[#11a95e] to-emerald-500 hover:from-[#0e9552] hover:to-[#11a95e] text-white px-8 py-3 rounded-xl font-bold text-[13px] transition-all flex items-center gap-2 shadow-sm disabled:opacity-70"
+              className="bg-gradient-to-r from-[#11a95e] to-emerald-500 hover:from-[#0e9552] hover:to-[#11a95e] text-white px-8 py-3 rounded-xl font-bold text-[13px] transition-all flex items-center gap-2 shadow-sm disabled:opacity-70 cursor-pointer"
             >
               {isSubmitting ? 'Создание...' : 'Опубликовать'}
             </button>

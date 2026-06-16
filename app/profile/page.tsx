@@ -97,6 +97,17 @@ const CATEGORY_HINTS: Record<string, { price: string, titlePh: string, descPh: s
   BUSINESS: { price: "100 - 1000", titlePh: "Например: Составить бизнес-план для кофейни", descPh: "Укажите масштаб бизнеса, какие именно финансовые расчеты требуются, в каком формате нужен итог..." },
 };
 
+const AVAILABLE_LANGS = [
+  { code: 'RU', name: 'Русский' },
+  { code: 'EN', name: 'English' },
+  { code: 'PL', name: 'Polski' },
+  { code: 'DE', name: 'Deutsch' },
+  { code: 'ES', name: 'Español' },
+  { code: 'IT', name: 'Italiano' },
+  { code: 'FR', name: 'Français' },
+  { code: 'UA', name: 'Українська' }
+];
+
 export default function ProfilePage() {
   const router = useRouter();
   
@@ -113,7 +124,7 @@ export default function ProfilePage() {
   const [myTasks, setMyTasks] = useState<any[]>([]);
   const [taskResponses, setTaskResponses] = useState<any[]>([]);
   const [taskModal, setTaskModal] = useState(false);
-  const [taskForm, setTaskForm] = useState({ title: '', description: '', budget: 0, category: 'DESIGN' });
+  const [taskForm, setTaskForm] = useState({ title: '', description: '', budget: 0, category: 'DESIGN', language: 'RU' });
 
   // === СТЕЙТ ДЛЯ ОТЗЫВОВ ===
   const [reviewModal, setReviewModal] = useState({ isOpen: false, orderId: '', targetEmail: '', rating: 5, comment: '' });
@@ -123,6 +134,7 @@ export default function ProfilePage() {
   const [bio, setBio] = useState('');
   const [skills, setSkills] = useState('');
   const [contacts, setContacts] = useState('');
+  const [spokenLanguages, setSpokenLanguages] = useState<{code: string, level: number}[]>([]); // НОВЫЙ СТЕЙТ ДЛЯ ЯЗЫКОВ
   const [showOnline, setShowOnline] = useState(true);
   const [role, setRole] = useState<'client' | 'freelancer' | 'both'>('both');
   const [savingProfile, setSavingProfile] = useState(false);
@@ -138,7 +150,7 @@ export default function ProfilePage() {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ 
-    title: '', price: 0, description: '', category: 'DESIGN', image_url: '' 
+    title: '', price: 0, description: '', category: 'DESIGN', image_url: '', language: 'RU' 
   });
   
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -278,6 +290,7 @@ export default function ProfilePage() {
       setBio(profile.bio || ''); 
       setContacts(profile.contacts || '');
       setSkills(profile.skills || ''); 
+      setSpokenLanguages(profile.spoken_languages || []);
       setShowOnline(profile.show_online ?? true);
       setRole(profile.role || 'both');
       
@@ -318,6 +331,7 @@ export default function ProfilePage() {
       bio: bio, 
       contacts: contacts,
       skills: skills,
+      spoken_languages: spokenLanguages,
       show_online: showOnline,
       updated_at: new Date() 
     });
@@ -414,7 +428,7 @@ export default function ProfilePage() {
 
   const openNewServiceModal = () => {
     setEditingId(null); 
-    setEditForm({ title: '', price: 0, description: '', category: 'DESIGN', image_url: '' }); 
+    setEditForm({ title: '', price: 0, description: '', category: 'DESIGN', image_url: '', language: 'RU' }); 
     setSelectedFile(null); 
     setShowSuggestions(false); 
     setShowDescSuggestions(false);
@@ -423,7 +437,8 @@ export default function ProfilePage() {
 
   const openEditModal = (service: any) => {
     setEditingId(service.id); 
-    setEditForm({ ...service }); 
+    // Подставляем язык из БД, если его нет - ставим RU
+    setEditForm({ ...service, language: service.language || 'RU' }); 
     setSelectedFile(null); 
     setShowSuggestions(false); 
     setShowDescSuggestions(false);
@@ -472,14 +487,12 @@ export default function ProfilePage() {
     else {
       if (data) setMyTasks([data[0], ...myTasks]);
       setTaskModal(false);
-      setTaskForm({ title: '', description: '', budget: 0, category: 'DESIGN' });
+      setTaskForm({ title: '', description: '', budget: 0, category: 'DESIGN', language: 'RU' });
       alert("Задание опубликовано!");
     }
   };
 
-  // === ЛОГИКА ОТЗЫВОВ ===
   const openReviewModal = (order: any) => {
-    // Определяем, кого мы оцениваем
     const targetEmail = user.email === order.client_email ? order.freelancer_email : order.client_email;
     setReviewModal({ isOpen: true, orderId: order.id, targetEmail: targetEmail || 'Исполнитель', rating: 5, comment: '' });
   };
@@ -487,7 +500,6 @@ export default function ProfilePage() {
   const handleSubmitReview = async () => {
     setIsSubmittingReview(true);
     try {
-      // 1. Сохраняем отзыв в БД
       const { error: reviewError } = await supabase.from('reviews').insert({
         order_id: reviewModal.orderId,
         from_email: user.email,
@@ -498,7 +510,6 @@ export default function ProfilePage() {
 
       if (reviewError) throw reviewError;
 
-      // 2. Меняем статус заказа на Completed (Завершен окончательно)
       await updateOrderStatus(reviewModal.orderId, 'Completed');
 
       alert('Отзыв успешно отправлен! Заказ полностью завершен.');
@@ -580,7 +591,7 @@ export default function ProfilePage() {
           <button onClick={() => setActiveTab('settings')} className={`flex-1 px-5 py-2.5 rounded-lg font-bold text-[13px] transition-all whitespace-nowrap text-center ${activeTab === 'settings' ? 'bg-gradient-to-r from-[#11a95e] to-emerald-500 text-white shadow-sm' : 'text-gray-400 hover:text-orange-500 hover:bg-gray-50'}`}>{translate('tab_settings')}</button>
         </div>
 
-        {/* === ПЕРЕКЛЮЧАТЕЛЬ ПЛИТКА/СПИСОК (С НОВЫМИ ИКОНКАМИ) === */}
+        {/* === ПЕРЕКЛЮЧАТЕЛЬ ПЛИТКА/СПИСОК === */}
         {(activeTab === 'services' || activeTab === 'tasks') && (
           <div className="flex justify-end mb-4">
             <div className="bg-gray-100/80 p-1 rounded-xl flex items-center shadow-inner gap-1">
@@ -688,6 +699,72 @@ export default function ProfilePage() {
                   <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest">{translate('label_bio')}</label>
                   <textarea value={bio} onChange={(e) => setBio(e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[14px] font-medium focus:border-orange-400 focus:ring-2 focus:ring-orange-500/10 focus:bg-white outline-none transition-all h-[110px] resize-none shadow-inner" />
                 </div>
+
+                {/* === БЛОК ВЛАДЕНИЯ ЯЗЫКАМИ === */}
+                <div className="flex flex-col gap-3 pt-4 border-t border-gray-100 mt-2">
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" /></svg>
+                    Языки общения и уровень
+                  </label>
+                  
+                  <div className="space-y-2">
+                    {spokenLanguages.map((lang, index) => {
+                      const langInfo = AVAILABLE_LANGS.find(l => l.code === lang.code);
+                      return (
+                        <div key={lang.code} className="flex items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-200">
+                          <span className="text-[13px] font-bold text-[#111] w-24">{langInfo?.name || lang.code}</span>
+                          <div className="flex gap-1">
+                            {[1, 2, 3, 4, 5].map(star => (
+                              <button
+                                key={star}
+                                onClick={() => {
+                                  const newLangs = [...spokenLanguages];
+                                  newLangs[index].level = star;
+                                  setSpokenLanguages(newLangs);
+                                }}
+                                className={`text-xl transition-transform hover:scale-110 ${star <= lang.level ? 'text-orange-400' : 'text-gray-300'}`}
+                              >
+                                ★
+                              </button>
+                            ))}
+                          </div>
+                          <button 
+                            onClick={() => setSpokenLanguages(spokenLanguages.filter(l => l.code !== lang.code))}
+                            className="text-gray-400 hover:text-red-500 transition-colors ml-4 cursor-pointer font-bold text-lg leading-none"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="flex gap-2 mt-1">
+                    <select 
+                      id="newLangSelect"
+                      defaultValue=""
+                      className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-[13px] font-bold outline-none focus:border-orange-400 cursor-pointer"
+                    >
+                      <option value="" disabled>Выберите язык...</option>
+                      {AVAILABLE_LANGS.filter(l => !spokenLanguages.find(sl => sl.code === l.code)).map(l => (
+                        <option key={l.code} value={l.code}>{l.name}</option>
+                      ))}
+                    </select>
+                    <button 
+                      onClick={() => {
+                        const select = document.getElementById('newLangSelect') as HTMLSelectElement;
+                        if (select.value) {
+                          setSpokenLanguages([...spokenLanguages, { code: select.value, level: 3 }]);
+                          select.value = ""; 
+                        }
+                      }}
+                      className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl font-bold text-[12px] transition-colors cursor-pointer"
+                    >
+                      + Добавить
+                    </button>
+                  </div>
+                </div>
+                {/* === КОНЕЦ БЛОКА ЯЗЫКОВ === */}
 
                 <div className="pt-3 border-t border-gray-100 mt-2 mb-2">
                   <label className="flex items-center gap-3 cursor-pointer group w-fit">
@@ -869,11 +946,9 @@ export default function ProfilePage() {
                                 {translate('btn_chat')} {openChatOrderId === o.id ? '▲' : '▼'}
                               </button>
                               
-                              {/* КНОПКИ ДЛЯ ИЗМЕНЕНИЯ СТАТУСОВ */}
                               {o.status === 'New' && <button onClick={() => updateOrderStatus(o.id, 'Process')} className="px-3.5 py-2 bg-blue-50 text-blue-600 rounded-xl font-bold text-[11px] hover:bg-blue-600 hover:text-white transition-colors border border-blue-100 shadow-sm cursor-pointer">{translate('btn_to_work')}</button>}
                               {o.status === 'Process' && <button onClick={() => updateOrderStatus(o.id, 'Done')} className="px-3.5 py-2 bg-gradient-to-r from-[#11a95e] to-emerald-500 text-white rounded-xl font-black text-[11px] uppercase tracking-wide hover:from-[#0e9552] hover:to-[#11a95e] transition-colors shadow-sm shadow-emerald-500/10 cursor-pointer">{translate('btn_deliver')}</button>}
                               
-                              {/* НОВАЯ КНОПКА: ЗАВЕРШИТЬ И ОЦЕНИТЬ (Только если статус Done) */}
                               {o.status === 'Done' && (
                                 <button onClick={() => openReviewModal(o)} className="px-3.5 py-2 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-xl font-black text-[11px] uppercase tracking-wide hover:from-orange-500 hover:to-orange-600 transition-colors shadow-sm cursor-pointer">
                                   Оценить и завершить
@@ -886,7 +961,6 @@ export default function ProfilePage() {
                           <tr>
                             <td colSpan={3} className="p-5 bg-gray-50/50 border-b border-gray-100">
                               <div className="max-w-3xl bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm mx-auto">
-                                {/* Передаем статус заказа в Чат, чтобы он блокировался при Completed */}
                                 <Chat orderId={o.id} userEmail={user.email} lang={lang} status={o.status} />
                               </div>
                             </td>
@@ -919,7 +993,6 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-6">
-              {/* Выбор звезд */}
               <div className="flex justify-center gap-2">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
@@ -934,7 +1007,6 @@ export default function ProfilePage() {
                 ))}
               </div>
 
-              {/* Текст отзыва */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest pl-1">Ваш комментарий</label>
                 <textarea 
@@ -957,8 +1029,7 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* ОСТАЛЬНЫЕ МОДАЛКИ (showModal, taskModal) ОСТАЛИСЬ БЕЗ ИЗМЕНЕНИЙ НИЖЕ... */}
-      
+      {/* МОДАЛКА УСЛУГИ */}
       {showModal && (
         <div className="fixed inset-0 z-[100] bg-gray-900/60 flex items-center justify-center p-4 backdrop-blur-sm">
           <div className="bg-white w-full max-w-md rounded-2xl p-6 relative max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-50">
@@ -991,7 +1062,7 @@ export default function ProfilePage() {
                 )}
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest">{translate('label_cat')}</label>
                   <select className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl outline-none focus:border-orange-400 focus:bg-white text-[14px] font-bold transition-all cursor-pointer shadow-inner" value={editForm.category} onChange={e => setEditForm({...editForm, category: e.target.value})}>
@@ -1002,6 +1073,24 @@ export default function ProfilePage() {
                   <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest">{translate('label_price')} (PLN)</label>
                   <input className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-500/10 focus:bg-white text-[14px] font-bold transition-all shadow-inner" type="number" placeholder={translate('ph_price')} value={editForm.price} onChange={e => setEditForm({...editForm, price: Number(e.target.value)})} />
                 </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest">Язык услуги</label>
+                <select 
+                  className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl outline-none focus:border-orange-400 focus:bg-white text-[14px] font-bold transition-all cursor-pointer shadow-inner" 
+                  value={editForm.language || 'RU'} 
+                  onChange={e => setEditForm({...editForm, language: e.target.value})}
+                >
+                  <option value="RU">Русский (RU)</option>
+                  <option value="EN">English (EN)</option>
+                  <option value="PL">Polski (PL)</option>
+                  <option value="DE">Deutsch (DE)</option>
+                  <option value="ES">Español (ES)</option>
+                  <option value="IT">Italiano (IT)</option>
+                  <option value="FR">Français (FR)</option>
+                  <option value="UA">Українська (UA)</option>
+                </select>
               </div>
               
               <div className="flex flex-col gap-1.5 relative" ref={descSuggestionsRef}>
@@ -1054,6 +1143,7 @@ export default function ProfilePage() {
         </div>
       )}
 
+      {/* МОДАЛКА ЗАДАНИЯ */}
       {taskModal && (
         <div className="fixed inset-0 z-[100] bg-gray-900/60 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-lg rounded-3xl p-8 relative shadow-2xl border border-gray-100 animate-in zoom-in-95 duration-200">
@@ -1091,18 +1181,7 @@ export default function ProfilePage() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest pl-1">Категория</label>
-                  <select 
-                    className="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-2xl outline-none focus:border-orange-400 text-[14px] font-bold cursor-pointer transition-all" 
-                    value={taskForm.category} 
-                    onChange={e => setTaskForm({...taskForm, category: e.target.value})}
-                  >
-                    {categories.map(c => <option key={c.id} value={c.id}>{translate(c.titleKey)}</option>)}
-                  </select>
-                </div>
-                
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="flex flex-col gap-1.5 relative">
                   <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest pl-1 flex justify-between">
                     <span>Бюджет (PLN)</span>
@@ -1114,9 +1193,35 @@ export default function ProfilePage() {
                     onChange={e => setTaskForm({...taskForm, budget: Number(e.target.value)})} 
                     className="w-full bg-gray-50 border border-gray-200 px-5 py-3.5 rounded-2xl outline-none focus:border-orange-400 text-[15px] font-black" 
                   />
-                  <div className="absolute top-[105%] left-1 text-[10px] font-bold text-gray-400 tracking-wide">
-                    В среднем: <span className="text-[#11a95e]">{currentHint.price} PLN</span>
-                  </div>
+                </div>
+                
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest pl-1">Категория</label>
+                  <select 
+                    className="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-2xl outline-none focus:border-orange-400 text-[14px] font-bold cursor-pointer transition-all" 
+                    value={taskForm.category} 
+                    onChange={e => setTaskForm({...taskForm, category: e.target.value})}
+                  >
+                    {categories.map(c => <option key={c.id} value={c.id}>{translate(c.titleKey)}</option>)}
+                  </select>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest pl-1">Язык</label>
+                  <select 
+                    className="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-2xl outline-none focus:border-orange-400 text-[14px] font-bold cursor-pointer transition-all" 
+                    value={taskForm.language || 'RU'} 
+                    onChange={e => setTaskForm({...taskForm, language: e.target.value})}
+                  >
+                    <option value="RU">Русский (RU)</option>
+                    <option value="EN">English (EN)</option>
+                    <option value="PL">Polski (PL)</option>
+                    <option value="DE">Deutsch (DE)</option>
+                    <option value="ES">Español (ES)</option>
+                    <option value="IT">Italiano (IT)</option>
+                    <option value="FR">Français (FR)</option>
+                    <option value="UA">Українська (UA)</option>
+                  </select>
                 </div>
               </div>
             </div>

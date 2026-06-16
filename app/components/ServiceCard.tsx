@@ -50,6 +50,8 @@ export default function ServiceCard({
 
   const isListView = viewMode === 'list';
 
+  const displayLang = service.language || 'RU'; // RU по умолчанию для старых карточек
+
   return (
     <div 
       onClick={navigateToDetails}
@@ -124,10 +126,10 @@ export default function ServiceCard({
             {service.title}
           </h3>
           
-          {/* Значок языка (берет значение из базы, если пусто - RU) */}
-          <span className="shrink-0 text-[10px] font-bold text-white bg-orange-500 px-1.5 py-0.5 rounded uppercase tracking-wider select-none shadow-sm mt-0.5 min-w-[20px] flex items-center justify-center">
-            {service.language || 'RU'}
-          </span>
+          {/* Значок языка (оранжевая плашка) */}
+<span className="shrink-0 text-[10px] font-bold text-white bg-orange-500 px-1.5 py-0.5 rounded uppercase tracking-wider select-none shadow-sm mt-0.5 min-w-[24px] flex items-center justify-center">
+  {displayLang}
+</span>
         </div>
 
         {/* Цена и кнопка */}
