@@ -4,13 +4,60 @@ import React, { useState, useRef, useEffect } from 'react';
 
 export default function AIChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<{ role: 'user' | 'ai', text: string }[]>([
-    { role: 'ai', text: 'Привет! Я виртуальный помощник UNIT. 🚀 Помогу найти специалиста, создать задание или разобраться в функциях. Какой у вас вопрос?' }
-  ]);
+  const [lang, setLang] = useState('RU');
+  const [messages, setMessages] = useState<{ role: 'user' | 'ai', text: string }[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // --- СЛОВАРЬ ИНТЕРФЕЙСА ПОМОЩНИКА ---
+  const t: Record<string, any> = {
+    RU: {
+      title: "Помощник UNIT",
+      greeting: "Привет! Я виртуальный помощник UNIT. 🚀 Помогу найти специалиста, создать задание или разобраться в функциях. Какой у вас вопрос?",
+      placeholder: "Ваш вопрос...",
+      send: "Отправить",
+      thinking: "UNIT думает",
+      error: "Извините, сейчас я на техническом перерыве. Пожалуйста, повторите вопрос чуть позже."
+    },
+    EN: {
+      title: "UNIT Assistant",
+      greeting: "Hello! I am the UNIT virtual assistant. 🚀 I can help you find a specialist, create a task, or figure out the features. What is your question?",
+      placeholder: "Your question...",
+      send: "Send",
+      thinking: "UNIT is thinking",
+      error: "Sorry, I'm currently on a technical break. Please try again a bit later."
+    },
+    PL: {
+      title: "Asystent UNIT",
+      greeting: "Cześć! Jestem wirtualnym asystentem UNIT. 🚀 Pomogę Ci znaleźć specjalistę, utworzyć zadanie lub zrozumieć funkcje. Jakie masz pytanie?",
+      placeholder: "Twoje pytanie...",
+      send: "Wyślij",
+      thinking: "UNIT myśli",
+      error: "Przepraszam, mam obecnie przerwę techniczną. Spróbuj ponownie później."
+    },
+    DE: {
+      title: "UNIT Assistent",
+      greeting: "Hallo! Ich bin der virtuelle UNIT-Assistent. 🚀 Ich helfe bei der Suche nach Spezialisten oder beim Erstellen von Aufgaben. Was ist Ihre Frage?",
+      placeholder: "Ihre Frage...",
+      send: "Senden",
+      thinking: "UNIT denkt nach",
+      error: "Entschuldigung, ich bin gerade in einer technischen Pause. Bitte versuchen Sie es später noch einmal."
+    }
+  };
+
+  const translate = (key: string) => (t[lang] && t[lang][key]) ? t[lang][key] : t['EN'][key] || key;
+
+  // Инициализация языка при загрузке
+  useEffect(() => {
+    const savedLang = localStorage.getItem('unit_lang') || 'RU';
+    setLang(savedLang);
+    // Устанавливаем приветственное сообщение на нужном языке
+    setMessages([
+      { role: 'ai', text: (t[savedLang] ? t[savedLang].greeting : t['EN'].greeting) }
+    ]);
+  }, []);
 
   // Слушаем команду на открытие чата из любой точки сайта
   useEffect(() => {
@@ -29,9 +76,18 @@ export default function AIChatWidget() {
     if (!input.trim() || isTyping) return;
     
     const userMsg = input.trim();
+    
+    // Показываем в UI чистое сообщение пользователя
     setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
     setInput('');
     setIsTyping(true);
+
+    // Подсказка для ИИ: на каком языке отвечать
+    const langNames: Record<string, string> = { RU: "Russian", EN: "English", PL: "Polish", DE: "German" };
+    const targetLangName = langNames[lang] || "English";
+    
+    // НЕВИДИМАЯ КОМАНДА: Приклеиваем системную инструкцию к сообщению перед отправкой на сервер
+    const apiPrompt = `[System instruction: You are a helpful assistant for the UNIT Marketplace. Reply strictly in ${targetLangName} language]. User asks: ${userMsg}`;
 
     try {
       const response = await fetch('https://cqqygtqtdztcwcdwvifr.supabase.co/functions/v1/clever-processor', {
@@ -41,7 +97,8 @@ export default function AIChatWidget() {
           'apikey': 'sb_publishable_T3mXpJUgZmPr7cwJcLPohA_0JsjIrAO',
           'Authorization': 'Bearer sb_publishable_T3mXpJUgZmPr7cwJcLPohA_0JsjIrAO'
         },
-        body: JSON.stringify({ message: userMsg }),
+        // Отправляем модифицированное сообщение с командой
+        body: JSON.stringify({ message: apiPrompt, language: lang }),
       });
 
       if (!response.ok) {
@@ -54,13 +111,12 @@ export default function AIChatWidget() {
       
     } catch (e: any) {
       console.error("Ошибка AI помощника:", e);
-      setMessages(prev => [...prev, { role: 'ai', text: 'Извините, сейчас я на техническом перерыве. Пожалуйста, повторите вопрос чуть позже.' }]);
+      setMessages(prev => [...prev, { role: 'ai', text: translate('error') }]);
     } finally {
       setIsTyping(false);
     }
   };
 
-  // Если чат закрыт, вообще ничего не рисуем на экране (круглой кнопки больше нет)
   if (!isOpen) return null;
 
   return (
@@ -69,7 +125,7 @@ export default function AIChatWidget() {
         <div className="bg-gradient-to-r from-[#11a95e] to-emerald-500 p-4 text-white flex justify-between items-center shadow-md">
           <div className="flex items-center gap-2.5">
             <div className="w-2.5 h-2.5 bg-emerald-300 rounded-full animate-pulse"></div>
-            <span className="font-black tracking-tight text-[15px]">Помощник UNIT</span>
+            <span className="font-black tracking-tight text-[15px]">{translate('title')}</span>
           </div>
           <button 
             onClick={() => setIsOpen(false)} 
@@ -94,7 +150,7 @@ export default function AIChatWidget() {
           
           {isTyping && (
             <div className="bg-white border border-gray-100 px-4 py-3 rounded-[18px] rounded-tl-none text-[12px] text-gray-400 font-bold max-w-[80%] flex items-center gap-1 shadow-sm">
-              <span>UNIT думает</span>
+              <span>{translate('thinking')}</span>
               <span className="animate-bounce delay-75">.</span>
               <span className="animate-bounce delay-150">.</span>
               <span className="animate-bounce delay-300">.</span>
@@ -109,7 +165,7 @@ export default function AIChatWidget() {
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && sendMessage()}
             className="flex-1 h-[40px] bg-gray-50 border border-gray-200 rounded-xl px-4 text-[13px] font-medium outline-none focus:border-orange-400 focus:bg-white transition-all"
-            placeholder="Ваш вопрос..."
+            placeholder={translate('placeholder')}
             disabled={isTyping}
           />
           <button
@@ -117,7 +173,7 @@ export default function AIChatWidget() {
             disabled={!input.trim() || isTyping}
             className="h-[40px] bg-gradient-to-r from-orange-400 to-orange-500 text-white font-black text-[11px] uppercase tracking-wider px-4 rounded-xl transition-all shadow-md shadow-orange-500/10 disabled:opacity-40 shrink-0 cursor-pointer"
           >
-            Отправить
+            {translate('send')}
           </button>
         </div>
       </div>
